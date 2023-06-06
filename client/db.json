@@ -1,0 +1,241 @@
+{
+  "users": [
+    {
+      "id": "bs2SMjUSLozO0sXWPzDvO",
+      "private": {
+        "firstName": "Alex",
+        "lastName": "",
+        "nikName": "",
+        "age": null,
+        "gender": "",
+        "password": "",
+        "avatar": ""
+      },
+      "contacts": {
+        "email": "",
+        "tel": null
+      },
+      "chats": [
+        "M0JRtcIZxgR9wIyDqD1ph",
+        "gWuR-dJswr6kgyJJm3o_k"
+      ],
+      "createdTime": "2023-05-11T19:42:56.549Z",
+      "updateTime": "2023-05-11T19:42:56.549Z"
+    },
+    {
+      "id": "z_NNPKfOPn4ug9bdZ2QKe",
+      "private": {
+        "firstName": "Valera",
+        "lastName": "",
+        "nikName": "",
+        "age": null,
+        "gender": "",
+        "password": "",
+        "avatar": ""
+      },
+      "contacts": {
+        "email": "",
+        "tel": null
+      },
+      "chats": [
+        "M0JRtcIZxgR9wIyDqD1ph",
+        "bUqEngXI163RJD359dmXb"
+      ],
+      "createdTime": "2023-05-11T19:43:00.909Z",
+      "updateTime": "2023-05-11T19:43:00.909Z"
+    },
+    {
+      "id": "SH-1QgRiboC9QCCT7rd4d",
+      "private": {
+        "firstName": "Kirill",
+        "lastName": "",
+        "nikName": "",
+        "age": null,
+        "gender": "",
+        "password": "",
+        "avatar": ""
+      },
+      "contacts": {
+        "email": "",
+        "tel": null
+      },
+      "chats": [
+        "bUqEngXI163RJD359dmXb",
+        "gWuR-dJswr6kgyJJm3o_k"
+      ],
+      "createdTime": "2023-05-12T18:51:46.848Z",
+      "updateTime": "2023-05-12T18:51:46.848Z"
+    }
+  ],
+  "messages": [
+    {
+      "id": "2_TjZMWLUjzHyrj_jqC_v",
+      "user": "bs2SMjUSLozO0sXWPzDvO",
+      "chat": "M0JRtcIZxgR9wIyDqD1ph",
+      "text": "Hello",
+      "createdTime": "2023-05-12T23:23:54.757Z",
+      "updateTime": "2023-05-12T23:23:54.757Z"
+    },
+    {
+      "id": "QPxg-OT59WKliQ-54eqzG",
+      "user": "bs2SMjUSLozO0sXWPzDvO",
+      "chat": "M0JRtcIZxgR9wIyDqD1ph",
+      "text": "Ta",
+      "createdTime": "2023-05-12T23:24:09.706Z",
+      "updateTime": "2023-05-12T23:24:09.706Z"
+    },
+    {
+      "id": "4aJTqU6AXd-MmUnBIEeY4",
+      "user": "bs2SMjUSLozO0sXWPzDvO",
+      "chat": "gWuR-dJswr6kgyJJm3o_k",
+      "text": "1223",
+      "createdTime": "2023-05-12T23:25:22.003Z",
+      "updateTime": "2023-05-12T23:25:22.003Z"
+    },
+    {
+      "id": "pr8ceZguDm0BlmUsEpZJT",
+      "user": "bs2SMjUSLozO0sXWPzDvO",
+      "chat": "gWuR-dJswr6kgyJJm3o_k",
+      "text": "1223",
+      "createdTime": "2023-05-12T23:25:25.456Z",
+      "updateTime": "2023-05-12T23:25:25.456Z"
+    },
+    {
+      "id": "GBDnDwJvWSbLH2KIHBw9Q",
+      "user": "bs2SMjUSLozO0sXWPzDvO",
+      "chat": "gWuR-dJswr6kgyJJm3o_k",
+      "text": "1223",
+      "createdTime": "2023-05-12T23:25:26.763Z",
+      "updateTime": "2023-05-12T23:25:26.763Z"
+    },
+    {
+      "id": "8cNshME3iXxPlPSiR13LO",
+      "user": "bs2SMjUSLozO0sXWPzDvO",
+      "chat": "gWuR-dJswr6kgyJJm3o_k",
+      "text": "1223",
+      "createdTime": "2023-05-12T23:25:27.896Z",
+      "updateTime": "2023-05-12T23:25:27.896Z"
+    },
+    {
+      "id": "Bnwdz3t7UaPSQHqrsvcPp",
+      "user": "SH-1QgRiboC9QCCT7rd4d",
+      "chat": "gWuR-dJswr6kgyJJm3o_k",
+      "text": "dsfdsf",
+      "createdTime": "2023-05-13T16:33:10.116Z",
+      "updateTime": "2023-05-13T16:33:10.116Z"
+    },
+    {
+      "id": "lgluTnKxY3cq4ImDVTiK-",
+      "user": "SH-1QgRiboC9QCCT7rd4d",
+      "chat": "gWuR-dJswr6kgyJJm3o_k",
+      "text": "dsfdsfsdfsdf",
+      "createdTime": "2023-05-13T16:33:13.000Z",
+      "updateTime": "2023-05-13T16:33:13.000Z"
+    },
+    {
+      "id": "npWPVUMV8iGJUk7MOUKkV",
+      "user": "bs2SMjUSLozO0sXWPzDvO",
+      "chat": "M0JRtcIZxgR9wIyDqD1ph",
+      "text": "dfgdfg",
+      "createdTime": "2023-05-13T17:16:21.395Z",
+      "updateTime": "2023-05-13T17:16:21.395Z"
+    },
+    {
+      "id": "-011Jo98lXyz9XUrPzxu1",
+      "user": "bs2SMjUSLozO0sXWPzDvO",
+      "chat": "M0JRtcIZxgR9wIyDqD1ph",
+      "text": "dfgdfgdfgdfg",
+      "createdTime": "2023-05-13T17:16:23.341Z",
+      "updateTime": "2023-05-13T17:16:23.341Z"
+    },
+    {
+      "id": "DMu9zFVSBmkPKUfcnTKRJ",
+      "user": "z_NNPKfOPn4ug9bdZ2QKe",
+      "chat": "M0JRtcIZxgR9wIyDqD1ph",
+      "text": "sdfsdf",
+      "createdTime": "2023-05-13T17:16:37.998Z",
+      "updateTime": "2023-05-13T17:16:37.998Z"
+    },
+    {
+      "id": "n5q9j_23mPwDEiCoa3oAM",
+      "user": "z_NNPKfOPn4ug9bdZ2QKe",
+      "chat": "M0JRtcIZxgR9wIyDqD1ph",
+      "text": "sdfsdfsdfsdf",
+      "createdTime": "2023-05-13T17:16:40.364Z",
+      "updateTime": "2023-05-13T17:16:40.364Z"
+    },
+    {
+      "id": "nKP4szRHT0S5tPqSAJ8jZ",
+      "user": "z_NNPKfOPn4ug9bdZ2QKe",
+      "chat": "M0JRtcIZxgR9wIyDqD1ph",
+      "text": "sdfsdfsdfsdfsdf",
+      "createdTime": "2023-05-13T17:16:42.368Z",
+      "updateTime": "2023-05-13T17:16:42.368Z"
+    },
+    {
+      "id": "MyRO2NJUEmghn2FtjozT_",
+      "user": "bs2SMjUSLozO0sXWPzDvO",
+      "chat": "M0JRtcIZxgR9wIyDqD1ph",
+      "text": "dfgmdlfmf.gmbc.xgf,d.fg,dlfg,d.fg,d./fg,d/fgdfgdfgdgdfg",
+      "createdTime": "2023-05-13T17:25:59.269Z",
+      "updateTime": "2023-05-13T17:25:59.269Z"
+    },
+    {
+      "id": "vQPahmXTbbb5HhkbqsN9i",
+      "user": "bs2SMjUSLozO0sXWPzDvO",
+      "chat": "M0JRtcIZxgR9wIyDqD1ph",
+      "text": "dfgmdlfmf.gmbc.xgf,d.fg' ,dlfg,d.fg,d./fg,d/fgdfgdfgdgdfg",
+      "createdTime": "2023-05-13T17:26:13.070Z",
+      "updateTime": "2023-05-13T17:26:13.070Z"
+    }
+  ],
+  "chats": [
+    {
+      "id": "M0JRtcIZxgR9wIyDqD1ph",
+      "users": [
+        "z_NNPKfOPn4ug9bdZ2QKe",
+        "bs2SMjUSLozO0sXWPzDvO"
+      ],
+      "messages": [
+        "2_TjZMWLUjzHyrj_jqC_v",
+        "QPxg-OT59WKliQ-54eqzG",
+        "npWPVUMV8iGJUk7MOUKkV",
+        "-011Jo98lXyz9XUrPzxu1",
+        "DMu9zFVSBmkPKUfcnTKRJ",
+        "n5q9j_23mPwDEiCoa3oAM",
+        "nKP4szRHT0S5tPqSAJ8jZ",
+        "MyRO2NJUEmghn2FtjozT_",
+        "vQPahmXTbbb5HhkbqsN9i"
+      ],
+      "createdTime": "2023-05-12T21:55:50.397Z",
+      "updateTime": "2023-05-12T21:55:50.397Z"
+    },
+    {
+      "id": "bUqEngXI163RJD359dmXb",
+      "users": [
+        "z_NNPKfOPn4ug9bdZ2QKe",
+        "SH-1QgRiboC9QCCT7rd4d"
+      ],
+      "messages": [],
+      "createdTime": "2023-05-12T21:56:08.317Z",
+      "updateTime": "2023-05-12T21:56:08.317Z"
+    },
+    {
+      "id": "gWuR-dJswr6kgyJJm3o_k",
+      "users": [
+        "bs2SMjUSLozO0sXWPzDvO",
+        "SH-1QgRiboC9QCCT7rd4d"
+      ],
+      "messages": [
+        "4aJTqU6AXd-MmUnBIEeY4",
+        "pr8ceZguDm0BlmUsEpZJT",
+        "GBDnDwJvWSbLH2KIHBw9Q",
+        "8cNshME3iXxPlPSiR13LO",
+        "Bnwdz3t7UaPSQHqrsvcPp",
+        "lgluTnKxY3cq4ImDVTiK-"
+      ],
+      "createdTime": "2023-05-12T21:56:16.115Z",
+      "updateTime": "2023-05-12T21:56:16.115Z"
+    }
+  ]
+}

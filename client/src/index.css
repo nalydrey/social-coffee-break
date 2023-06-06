@@ -1,0 +1,57 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+::-webkit-scrollbar{
+  width: 15px;
+  height: 15px;
+}
+
+::-webkit-scrollbar-track{
+  background: rgba(34, 46, 59, 0.68);
+}
+::-webkit-scrollbar-thumb{
+  border: 3px solid rgba(47, 148, 176, 0.68);
+  background: rgba(44, 63, 73, 0.8);
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb:hover{
+  border: 3px solid #004A77;
+}
+
+@layer components {
+  .temp{
+    @apply border border-black min-h-[20px]
+  }
+  .box{
+    @apply bg-white rounded-md shadow-light
+  }
+  .btn {
+    @apply border-4 border-gray-500 rounded-xl px-4;
+  }
+  .btn-1 {
+    @apply border border-gray-400 px-7 py-1 font-bold rounded-md hover:bg-slate-300 duration-300 ;
+  }
+  .btn-bar {
+    @apply btn font-bold text-2xl w-[180px] transition-all duration-300 hover:bg-gray-200;
+  }
+  .frame {
+    @apply border-4 border-blue-500 rounded-xl px-5 py-2;
+  }
+  .frame-chat {
+    @apply p-3 border-2 border-yellow-600 bg-gradient-to-b from-slate-600 via-stone-800 to-slate-600 rounded-md;
+  }
+  .img {
+    @apply object-cover h-full w-full;
+  }
+  .card-wrap {
+    @apply flex flex-col gap-3 items-center border-2 border-gray-300 max-w-[200px] py-3 px-5 rounded-lg shadow-light;
+  }
+  .input-field {
+    @apply border-2 border-gray-400 rounded-md p-1 px-3 text-xl font-bold shadow-light focus:outline focus:outline-2 focus:outline-sky-500 
+  }
+  .input-error {
+    @apply absolute right-0 top-0 duration-300 text-red-500 text-lg bg-gray-700 p-1 rounded-xl border-2 -z-[1]  border-red-500 font-bold translate-x-full animate-apear }
+}
+
