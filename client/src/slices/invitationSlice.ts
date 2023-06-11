@@ -17,7 +17,7 @@ const initialState: Slice<UserModel>= {
 export const getInvitations = createAsyncThunk(
     'invitations/getInvitations',
     async (invitations: string[]) => {
-        console.log('getInvitations');
+        // console.log('getInvitations');
         if(invitations.length){
             const query = queryString({_id: invitations})
             const {data} = await axios.get<{users: UserModel[]}>(`${USERSROUTE}?${query}`)
@@ -34,10 +34,9 @@ export const acceptInvitation = createAsyncThunk(
       {friendId, currentUserId}:{friendId: string, currentUserId: string},
       {dispatch}
       ) => {
-        console.log('friendId',friendId);
-        console.log('currentUserId',currentUserId);
+        // console.log('friendId',friendId);
+        // console.log('currentUserId',currentUserId);
         const {data} = await axios.put<{user: UserModel}>(`${USERSROUTE}/friends/accept/${friendId}/${currentUserId}`)
-        console.log(data)
         dispatch(addUserToFriends(data))
         dispatch(deleteInvitationFromCurrentUser({friendId: data.user._id}))
         dispatch(addFriendToCurrentUser({friendId}))
@@ -53,8 +52,8 @@ export const rejectInvitation = createAsyncThunk(
         {friendId, currentUserId}:{friendId: string, currentUserId: string},
         {dispatch}
         ) => {
-        console.log('friendId',friendId)
-        console.log('currentUserId',currentUserId)
+        // console.log('friendId',friendId)
+        // console.log('currentUserId',currentUserId)
         const {data} = await axios.put<{user: UserModel}>(`${USERSROUTE}/friends/reject/${friendId}/${currentUserId}`)
         dispatch(deleteInvitationFromCurrentUser({friendId}))
         return data
@@ -70,11 +69,19 @@ export const invitationSlice = createSlice({
             .addCase(getInvitations.fulfilled, (state, action) => {
                 state.container = action.payload.users
             })
+            .addCase(acceptInvitation.pending, (state, action) => {
+                state.isLoading = true
+            })
             .addCase(acceptInvitation.fulfilled, (state, action) => {
                 state.container = state.container.filter(user => user._id !== action.payload.user._id)
+                state.isLoading = false
+            })
+            .addCase(rejectInvitation.pending, (state, action) => {
+                state.isLoading = true
             })
             .addCase(rejectInvitation.fulfilled, (state, action) => {
                 state.container = state.container.filter(user => user._id !== action.payload.user._id)
+                state.isLoading = false
             })
     }
 })

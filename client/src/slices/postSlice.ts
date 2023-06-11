@@ -59,9 +59,9 @@ export const setLike = createAsyncThunk(
 
 export const deletePost = createAsyncThunk(
     'posts/deletePost',
-    async ({postId}:{postId: string}) => {
+    async ({postId, userId}:{postId: string, userId: string}) => {
         console.log('delete post')
-        const {data} = await axios.delete<{isDelete: boolean}>(`${POSTSROUTE}${postId}`)
+        const {data} = await axios.delete<{isDelete: boolean}>(`${POSTSROUTE}${postId}/${userId}`)
         if(data.isDelete) return {postId}
     }
 )
@@ -113,6 +113,9 @@ const postsSlice = createSlice({
             .addCase(getMyPosts.fulfilled, (state, action) => {
                 state.container = action.payload 
                 state.isLoading = false
+            })
+            .addCase(getPosts.pending, (state, action) => {
+                state.isLoading = true
             })
             .addCase(getPosts.fulfilled, (state, action) => {
                 state.container = action.payload 

@@ -45,7 +45,23 @@ export const getMyChats = async (req, res) => {
         console.log('getMyChats');
         const userId = req.params.userId
         const chats = await Chat.find({users: userId}).populate('users', 'private.avatar private.firstName')
-        res.json({chats})
+
+        const addTotal = async (elem) => {
+            const count = await Message.find({chat: elem._id, isRead: false}).countDocuments()
+            elem._doc.unreadMessageCount = count
+            return elem
+        }
+
+
+        const chatsUpd = await Promise.all(chats.map(async chat => {
+            const count = await Message.find({chat: chat._id, user: {$ne: userId}, isRead: false}).countDocuments()
+            chat._doc.unreadMessageCount = count
+            return chat
+        }
+            ))
+
+        res.json({chats: chatsUpd})
+
 
     } catch (error) {
         console.log('getMyChats error', error);

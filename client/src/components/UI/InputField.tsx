@@ -18,12 +18,12 @@ export const InputField = ({
 }: InputProps) => {
   return (
     <label
-      className={`group-focus:bg-red-500  block border-4 rounded-xl p-1 border-blue-300 ${
-        error ? "border-red-600" : ""
+      className={` group-focus:text-green-400  
+      ${error ? "border-red-600" : ""
       }`}
     >
       <input
-        className=" text-2xl w-full p-1 outline-0 rounded-lg focus:bg-gray-500/20"
+        className="group"
         type="text"
         name={name}
         onChange={onChange}

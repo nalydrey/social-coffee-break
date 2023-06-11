@@ -15,11 +15,10 @@ const initialState: Slice<UserModel> = {
 export const getSuggestations = createAsyncThunk(
     'invitations/getSuggestations',
     async (suggestations: string[]) => {
-        console.log('getInvitations');
+        // console.log('getInvitations');
         if(suggestations.length){
             const query = queryString({_id: suggestations})
             const {data} = await axios.get<{users: UserModel[]}>(`${USERSROUTE}?${query}`)
-            console.log(data);
             return data
         }
         return {users: []}
@@ -58,11 +57,19 @@ export const suggestationSlice = createSlice({
     reducers: {},
     extraReducers: (builder) => {
         builder
+            .addCase(suggestToBeFriends.pending, (state, action) => {
+                state.isLoading = true
+            })
             .addCase(suggestToBeFriends.fulfilled, (state, action) => {
                 state.container.push(action.payload.user)
+                state.isLoading = false
+            })
+            .addCase(cancelSuggestationToBeFriends.pending, (state, action) => {
+                state.isLoading = true
             })
             .addCase(cancelSuggestationToBeFriends.fulfilled, (state, action) => {
                 state.container = state.container.filter(user => user._id !== action.payload.user._id )
+                state.isLoading = false
             })
             .addCase(getSuggestations.fulfilled, (state, action) => {
                 state.container = action.payload.users

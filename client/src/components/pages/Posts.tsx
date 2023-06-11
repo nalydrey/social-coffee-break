@@ -10,6 +10,7 @@ import { deletePost, getPosts, setLike } from '../../slices/postSlice'
 export const Posts = () => {
 
     const posts = useAppSelector<PostModel[]>(state => state.posts.container)
+    const isLoadingPosts = useAppSelector<boolean>(state => state.posts.isLoading)
     const currentUser = useAppSelector<UserModel | null>(state => state.currentUser.user)
     const dispatch = useAppDispatch()
 
@@ -24,7 +25,7 @@ export const Posts = () => {
     >
         <MappingBox
             className='grow'
-            isLoading = {false}
+            isLoading = {isLoadingPosts}
             isAlternate = {false}
             loadingComponent = 'Loading...'
             alternateComponent = 'Пока нет постов'
@@ -38,7 +39,7 @@ export const Posts = () => {
                             currentUserId={currentUser._id}
                             onLikeDislike={(isLike)=>{console.log(isLike);
                              dispatch(setLike({userId: currentUser._id, postId: post._id, isLike}))}}
-                            onDelete={(postId)=>{dispatch(deletePost({postId}))}}
+                            onDelete={(postId)=>{dispatch(deletePost({postId, userId: currentUser._id}))}}
                         />
                     ))
                 }

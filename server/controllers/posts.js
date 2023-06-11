@@ -1,4 +1,5 @@
 import Post from '../models/post.js'
+import User from '../models/users.js'
 import fs from 'fs'
 
 
@@ -20,8 +21,8 @@ export const createPost = async(req, res) => {
         let post = new Post({
             name, discription, images, user
         })
-        const a = await (await post.save()).populate('user', 'private.avatar private.firstName private.lastName')
-        console.log(a);
+        await User.findByIdAndUpdate(user, {$push: {posts: post._id}} )
+        await (await post.save()).populate('user', 'private.avatar private.firstName private.lastName')
         res.json({post})
     }
     catch(err){
@@ -61,7 +62,8 @@ export const deletePost = async(req, res) => {
     try{
         console.log('deletePost');
         console.log(req.params);
-        const {postId} = req.params
+        const {postId, userId} = req.params
+        await User.findByIdAndUpdate(userId, {$pull: {posts: postId}})
         const post =await Post.findByIdAndDelete(postId)
         console.log(post);
         //Delete images

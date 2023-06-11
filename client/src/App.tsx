@@ -6,7 +6,7 @@ import { UserModel } from './models/UserModel'
 import { MainBar } from "./components/Layout/MainBar"
 import { changeMyAvatar, changeMyPicture, enter} from './slices/currentUserSlice'
 import { ContentBar } from "./components/Layout/ContentBar"
-import { Route, Routes, Link } from "react-router-dom"
+import { Route, Routes, Link, useNavigate } from "react-router-dom"
 import { RegisterForm } from "./components/UI/RegisterForm"
 import { useAppDispatch, useAppSelector } from "./hooks/hooks"
 import { controlMessageModal } from "./slices/auxiliarySlice"
@@ -22,10 +22,12 @@ import { FriendPreview } from './components/outputs/FriendPreview'
 import { MappingBox } from './components/UI/MappingBox'
 import {  getUsers } from './slices/usersSlice'
 import { MenuItem } from './components/UI/MenuItem'
-import { getFriends } from './slices/friendSlice'
-import { getInvitations } from './slices/invitationSlice'
-import { getSuggestations } from './slices/suggestationSlice'
+import { deleteUserFromFriends, getFriends } from './slices/friendSlice'
+import { acceptInvitation, getInvitations, rejectInvitation } from './slices/invitationSlice'
+import { cancelSuggestationToBeFriends, getSuggestations } from './slices/suggestationSlice'
 import { ContentBox } from './components/UI/ContentBox'
+import { matchedValueInArr } from './customFunctions/isCoincidenceInArr'
+import { Nav } from './components/pages/Users'
 
 
 
@@ -37,6 +39,7 @@ function App() {
   const suggestations = useAppSelector<UserModel[]>(state => state.suggestations.container)
   const users = useAppSelector<UserModel[]>(state => state.users.container)
   const dispatch = useAppDispatch()
+  const navigate = useNavigate()
 
   useEffect(()=>{
     const userId = localStorage.getItem('currentUser')
@@ -44,7 +47,7 @@ function App() {
   },[])
   
   useEffect(()=>{
-    dispatch(getUsers()) 
+    dispatch(getUsers({})) 
   },[])
 
   useEffect(() => {
@@ -86,6 +89,52 @@ function App() {
     dispatch(changeMyPicture({userId: currentUser._id, file: avatar}))
   }
 
+  const goToChat: (userId: string) => void = (userId) => {
+    if(currentUser){
+        const state: Nav = {
+            isCreateNewChat: false,
+            activeChat: '',
+            userId
+        }
+
+        const userChats = users.find((user) => user._id === userId)?.chats
+        if (userChats) {
+            const matchedChat = matchedValueInArr(currentUser.chats, userChats)
+            if (matchedChat) {
+            //переходим в чат
+            state.isCreateNewChat = false
+            state.activeChat = matchedChat
+            } 
+            else {
+            //Создаем новый чат
+            state.isCreateNewChat = true
+            }
+            navigate("/chats", {state})
+        }
+    }
+}
+
+const handlerDeleteFromFriends = (id:string) => {
+  if(currentUser)
+  dispatch(deleteUserFromFriends({friendId: id, currentUserId: currentUser._id}))
+}
+
+const handlerCancelSuggestation = (id:string) => {
+  if(currentUser && currentUser.myRequests.includes(id)){
+  dispatch(cancelSuggestationToBeFriends({friendId: id, currentUserId: currentUser._id}))
+  }
+}
+
+const handlerReject = (id:string) => {
+  if(currentUser){
+  dispatch(rejectInvitation({currentUserId:currentUser._id , friendId:id }))
+  }
+}
+
+const handlerAccept = (id:string) => {
+  if(currentUser)
+  dispatch(acceptInvitation({friendId: id, currentUserId: currentUser._id}))
+}
 
   const inviteQty = currentUser?.invitations.length
   const lastElement = currentUser && getLastElement(currentUser.invitations)
@@ -122,6 +171,7 @@ function App() {
                       {
                         friends.map(user => (
                           <FriendPreview
+                            key={user._id}
                             avatar={user.private.avatar}
                             picture={user.picture}
                             title={`${user.private.firstName} ${user.private.lastName}`}
@@ -129,12 +179,12 @@ function App() {
                             <MenuItem
                                 itemName='message'
                                 itemText='Написать сообщение'
-                                onChange={()=>{}}
+                                onChange={()=>{goToChat(user._id)}}
                             />
                             <MenuItem
                                 itemName='delete'
                                 itemText='Удалить из друзей'
-                                onChange={()=>{}}
+                                onChange={()=>{handlerDeleteFromFriends(user._id)}}
                             />
                           </FriendPreview>
                         ))
@@ -154,19 +204,25 @@ function App() {
                       <ul>
                         {invitations.map(user => (
                           <FriendPreview
+                              key={user._id}
                               avatar={user.private.avatar}
                               picture={user.picture}
                               title={`${user.private.firstName} ${user.private.lastName}`}
                           >
                             <MenuItem
+                                itemName='message'
+                                itemText='Написать сообщение'
+                                onChange={()=>{goToChat(user._id)}}
+                            />
+                            <MenuItem
                               itemName='add'
                               itemText='Принять приглашение'
-                              onChange={()=>{}}
+                              onChange={()=>{handlerAccept(user._id)}}
                             />
                             <MenuItem
                                 itemName='reject'
                                 itemText='Отклонить приглашение'
-                                onChange={()=>{}}
+                                onChange={()=>{handlerReject(user._id)}}
                             />
                           </FriendPreview>
                         ))}
@@ -185,14 +241,20 @@ function App() {
                       <ul>
                         {suggestations.map(user => (
                           <FriendPreview
+                              key={user._id}
                               avatar={user.private.avatar}
                               picture={user.picture}
                               title={`${user.private.firstName} ${user.private.lastName}`}
                           >
                             <MenuItem
+                                itemName='message'
+                                itemText='Написать сообщение'
+                                onChange={()=>{goToChat(user._id)}}
+                            />
+                            <MenuItem
                                 itemName='reject'
                                 itemText='Отозвать приглашение'
-                                onChange={()=>{}}
+                                onChange={()=>{handlerCancelSuggestation(user._id)}}
                             />
                           </FriendPreview>
                         ))}

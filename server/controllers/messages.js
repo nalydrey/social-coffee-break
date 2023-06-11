@@ -25,8 +25,8 @@ export const createMessage = async (req, res) => {
     try {
         console.log('createMessage');
         console.log(req.body)
-        const {user, chat, text} = req.body
-        const newMessage = new Message({user, chat, text})
+        const {createdId, user, chat, text} = req.body
+        const newMessage = new Message({createdId, user, chat, text})
         await newMessage.save()
         //Add message to chat
         const message = await Message.findById(newMessage._id).populate('user', 'private.avatar')
@@ -35,6 +35,7 @@ export const createMessage = async (req, res) => {
         console.log('createMessage error', error);
     }
 };
+
 export const editMessage = async (req, res) => {
     try {
         console.log('editMessage');
@@ -42,6 +43,21 @@ export const editMessage = async (req, res) => {
         console.log('editMessage error', error);
     }
 };
+
+export const readMessage = async (req, res) => {
+    try {
+        console.log('readMessage');
+        const {messageId} = req.params
+        console.log(messageId);
+        const message = await Message.findByIdAndUpdate(messageId, {$set: {isRead: true}}, {new: 1})
+        console.log(message);
+        res.json({message})
+    } catch (error) {
+        console.log('readMessage error', error);
+        res.json({error: 'status is not changed'})
+    }
+};
+
 export const deleteMessage = async (req, res) => {
     try {
         console.log('deleteMessage');

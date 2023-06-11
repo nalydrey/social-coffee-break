@@ -1,10 +1,12 @@
-import React from 'react'
+import React, {useState} from 'react'
 import { URL } from '../../http'
 import { EyeIcon, HandThumbUpIcon, HandThumbDownIcon, TrashIcon } from '@heroicons/react/24/solid'
 import moment from 'moment'
 import { SimpleSlider } from '../UI/SimpleSlider'
 import defaultAvatar from '../../assets/defaultAva.png'
 import { UserModel } from '../../models/UserModel'
+import { useEffect } from 'react'
+import { ImageWithPreloader } from '../UI/ImageWithPreloader'
 
 
 interface PostProps {
@@ -37,6 +39,10 @@ export const Post = ({
     onDelete=() => {}
 }:PostProps) => {
 
+    
+
+    
+
 
   return (
     <li className='relative'>
@@ -45,13 +51,16 @@ export const Post = ({
         ><TrashIcon className='w-5 fill-none stroke-white stroke-2'/>
         </button>
         <h3 className='text-center text-3xl font-medium'>{name}</h3>
-        <SimpleSlider>
-            {images.map(image => {
-               return <img className='img' 
-                           key={image} 
-                           src={`${URL+image}`} 
-                           alt="Image" />
-            })}
+        <SimpleSlider dur={300}>
+            {images.map( image => {
+               return (
+                    <ImageWithPreloader 
+                        src={URL+image}
+                        alt='Image'
+                    />
+                )
+                })
+            }
         </SimpleSlider>
         <div className='flex gap-10 select-none'>
             <div className='flex gap-2 cursor-pointer'
@@ -70,7 +79,8 @@ export const Post = ({
         <p className='text-xl font-medium'>{discription}</p>
         <div className='flex items-center gap-3 justify-end'>
             <div className='w-10 h-10 rounded-full overflow-hidden shadow-light border border-gray-300'>
-                <img className='img' src={user.private.avatar ? URL+user.private.avatar : defaultAvatar} alt="Avatar" />
+                {/* <img className='img' src={user.private.avatar ? URL+user.private.avatar : defaultAvatar} alt="Avatar" /> */}
+                <ImageWithPreloader className='img' src={user.private.avatar ? URL+user.private.avatar : defaultAvatar} alt="Avatar" />
             </div>
             <div className='flex flex-col'>
                 <p className='border-b-2 border-b-gray-500'>{user.private.firstName} {user.private.lastName}</p>

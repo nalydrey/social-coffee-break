@@ -20,6 +20,7 @@ export const MyPosts = () => {
     const [images, setImg] = useState<FileList | null>(null)
     const dispatch = useAppDispatch()
     const posts = useAppSelector<PostModel[]>(state => state.posts.container)
+    const isLoadingPosts = useAppSelector<PostModel[]>(state => state.posts.isLoading)
     const currentUser = useAppSelector<UserModel>(state => state.currentUser.user)
 
 
@@ -72,7 +73,7 @@ export const MyPosts = () => {
         </div>
 
         <MappingBox
-            isLoading = {false}
+            isLoading = {isLoadingPosts}
             isAlternate = {!posts.length}
             loadingComponent = 'Loading...'
             alternateComponent = 'Пока нет постов'
@@ -85,7 +86,7 @@ export const MyPosts = () => {
                             {...post}
                             currentUserId={currentUser._id}
                             onLikeDislike={(isLike)=>dispatch(setLike({userId: currentUser._id, postId: post._id, isLike}))}
-                            onDelete={(postId)=>{dispatch(deletePost({postId}))}}
+                            onDelete={(postId)=>{dispatch(deletePost({postId, userId: currentUser._id}))}}
                         />
                     ))
                 }

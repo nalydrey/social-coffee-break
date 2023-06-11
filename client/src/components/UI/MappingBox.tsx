@@ -24,7 +24,7 @@ export const MappingBox = ({
 
 
   return (
-    <div className={`${className} bg-white rounded-md p-3`}>
+    <div className={`${className} rounded-md p-3`}>
         { 
             isLoading ?
             <div className='flex justify-center items-center h-full text-lg font-medium text-gray-500'>{loadingComponent}</div>

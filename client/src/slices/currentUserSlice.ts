@@ -16,8 +16,7 @@ const initialState: CurrentUserState = {
 } 
 
 export const enter = createAsyncThunk("currentUser/enter", async (userId: string) => {
-    const {data}:{data: {user: UserModel}} = await axios(`${USERSROUTE}/${userId}`)
-    console.log(data);
+    const {data} = await axios<{user: UserModel}>(`${USERSROUTE}/${userId}`)
     return data.user
 })
 
@@ -87,6 +86,10 @@ export const currentUserSlice = createSlice({
       if(state.user)
       state.user.friends = state.user.friends.filter(userId => userId !== action.payload.friendId)
     },
+    deleteChatFromCurrentUser: (state, action: PayloadAction<{chatId: string}>) => {
+      if(state.user)
+      state.user.chats = state.user.chats.filter(chatId => chatId !== action.payload.chatId)
+    },
   },
   extraReducers: (builder) => {
     builder
@@ -118,6 +121,7 @@ export const {
   deleteFriendFromCurrentUser,
   deleteInvitationFromCurrentUser,
   deleteSuggestationFromCurrentUser,
+  deleteChatFromCurrentUser
  } = currentUserSlice.actions
 
 export default currentUserSlice.reducer

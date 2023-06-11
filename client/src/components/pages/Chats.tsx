@@ -7,7 +7,7 @@ import { URL } from '../../http';
 import defaultFoto from '../assets/defaultAva.png'
 import { useFormik } from 'formik';
 import * as Yup from 'yup'
-import { createMessage, deleteMessage, getMessages, resetMessages } from '../../slices/messagesSlice';
+import { createMessage, createTempMessage, deleteMessage, getMessages, readMessage, resetMessages } from '../../slices/messagesSlice';
 import { Message } from '../../models/MessageModel';
 import { Slice } from '../../models/Slice';
 import moment from 'moment'
@@ -18,10 +18,15 @@ import { ContentBox } from '../UI/ContentBox';
 import { MappingBox } from '../UI/MappingBox';
 import { RoundButton } from '../UI/RoundButton';
 import { PaperAirplaneIcon } from '@heroicons/react/24/solid';
+import { useOnScreen } from '../../hooks/useOnScreen';
+import { nanoid } from '@reduxjs/toolkit';
+
 
 
 
 export const Chats = () => {
+
+    const currentUser = useAppSelector<UserModel | null>(state => state.currentUser.user)
 
     const formik = useFormik({
         initialValues:{
@@ -31,24 +36,42 @@ export const Chats = () => {
             message: Yup.string().required('Required')
             }),
         onSubmit: (value, helpers) => {
-            dispatch(createMessage({
-                user: currentUser._id, 
-                chat: currentChat, 
-                text: formik.values.message}))
-            helpers.resetForm()
+            if(currentUser){
+                const createdId = nanoid()
+                // console.log(new Date());
+                
+                dispatch(createTempMessage({
+                    _id: 'temp', 
+                    createdId,
+                    user: currentUser,
+                    chat: currentChat,
+                    isRead: false,
+                    text: formik.values.message,
+                    createdAt: new Date(),
+                    updatedAt: new Date(),
+                }))
+
+                dispatch(createMessage({
+                    createdId,
+                    user: currentUser._id, 
+                    chat: currentChat, 
+                    text: formik.values.message}))
+
+                helpers.resetForm()
+            }
         }
     })
     const {state} = useLocation()
     const navigate = useNavigate()
     const dispatch = useAppDispatch()
-    const currentUser = useAppSelector<UserModel>(state => state.currentUser.user)
     const messages = useAppSelector<Message[]>(state => state.messages.container)
+    const isSending = useAppSelector<boolean>(state => state.messages.isSending)
     const currentChat = useAppSelector((state:{chats: Chat}) => {
         const currentChat = state.chats.container.find(chat => chat.isActive)
         return currentChat?._id || ''
     })
     const chats: ChatModel[] = useAppSelector(state => state.chats.container)
-    console.log(currentChat);
+
     
 
     useEffect(()=>{
@@ -74,6 +97,16 @@ export const Chats = () => {
             dispatch(resetMessages())
         }
     },[currentChat])
+
+    const handlerOnVisible = (messageId: string, messageUser: string, isRead: boolean) => {
+        console.log(currentUser?._id !== messageUser);
+        
+        if(currentUser?._id !== messageUser && !isRead){
+            dispatch(readMessage(messageId))
+
+        }
+        
+    }
     
 
   return (
@@ -96,6 +129,7 @@ export const Chats = () => {
                             key={chat._id}
                             chatId={chat._id}
                             avatar={avatar}
+                            unreadMessage = {chat.unreadMessageCount}
                             firstName={firstName}
                             isActive={chat.isActive}
                             onClick={(chatId)=>{dispatch(activateChat(chatId))}}
@@ -105,7 +139,7 @@ export const Chats = () => {
                 })}
 
             </MappingBox>
-            <div className='relative grow flex flex-col shadow-light rounded-lg'>
+            <div className='relative grow flex flex-col shadow-light rounded-lg bg-sky-200 overflow-hidden'>
                 <MappingBox 
                     className='bg-sky-200 grow overflow-hidden min-h-[500px] rounded-b-none'
                     isAlternate = {!messages.length}
@@ -113,20 +147,23 @@ export const Chats = () => {
                     alternateComponent = {currentChat ? 'В этом чате пока нет сообщений' : 'Выберете чат'}
                     loadingComponent = 'Loading...'
                 >
-                    <ul className={`flex flex-col gap-3 h-[100%] overflow-y-auto pr-2 ${currentChat ? 'pb-14':''}`}>
-                        {
+                    <ul className={`max-h-[500px] flex flex-col gap-3 h-[100%] overflow-y-auto pr-2 ${currentChat ? 'pb-14':''}`}>
+                        { currentUser &&
                             messages.map(message => {
-                                console.log(message);
                                 
                                 return(
                                     <MessageCard 
                                         isMyMessage={currentUser._id === message.user._id}
-                                        key={message._id}
+                                        key={message.createdId}
                                         messageId={message._id}
                                         text={message.text}
+                                        isSending = {isSending && message._id === 'temp'}
+                                        isRead = {message.isRead}
+                                        isDeleteButton = {currentUser._id === message.user._id}
                                         avatar={message.user.private.avatar}
                                         time={moment(message.createdAt).format('D MMM HH:mm')}
                                         onDelete={(messageId)=>{dispatch(deleteMessage(messageId))}}
+                                        onVisible={()=> handlerOnVisible(message._id, message.user._id, message.isRead )}
                                     />
                                 )
                             }
@@ -134,7 +171,7 @@ export const Chats = () => {
                         }
                     </ul>
                 </MappingBox>
-                <form   className={'flex gap-2 px-3 py-1 bg-sky-200 rounded-b-lg'}
+                <form   className={`flex gap-2 px-3 py-1 bg-sky-200 rounded-b-lg duration-500 ${!currentChat ? 'translate-y-full' : 'translate-y-0'} `}
                         onSubmit={formik.handleSubmit}
                 >
                     <input  className={` border-2 border-sky-700 text-xl rounded-md grow p-1`} 
@@ -146,7 +183,7 @@ export const Chats = () => {
                             onChange={formik.handleChange}
                     />
                     <RoundButton
-                            title='Sent'
+                            title='Send'
                             disabled={!currentChat}
                             icon = {<PaperAirplaneIcon className='w-5 h-5 text-slate-300'/>}
                             type='submit' 

@@ -3,7 +3,7 @@ import { ChatModel } from "../models/ChatModel"
 import { CHATSROUTE, USERSROUTE } from "../http"
 import { UserModel } from "../models/UserModel"
 import axios from "axios"
-import { addMyChat } from "./currentUserSlice"
+import { addMyChat, deleteChatFromCurrentUser } from "./currentUserSlice"
 import { addChat } from "./usersSlice"
 import { Message } from "../models/MessageModel"
 import { deleteAllSms, resetMessages } from "./messagesSlice"
@@ -33,9 +33,9 @@ import { deleteAllSms, resetMessages } from "./messagesSlice"
         "chats/getMyChats",
         async ({isCreateNewChat, activeChat, users}: GetData, {dispatch}) => {
 
-            console.log('isCreateNewChat', isCreateNewChat,);
-            console.log('activeChat', activeChat );
-            console.log('users', users);
+            // console.log('isCreateNewChat', isCreateNewChat,);
+            // console.log('activeChat', activeChat );
+            // console.log('users', users);
 
             let chats: ChatModel[] = []
             //Если нужно создать новый чат
@@ -49,12 +49,13 @@ import { deleteAllSms, resetMessages } from "./messagesSlice"
             }
             //Получаем свои чаты
             const {data} = await axios.get(`${CHATSROUTE}/my/${users[0]}`) 
+            console.log(data);
+            
             chats  = data.chats
             // console.log(chats);
             
             //удалить текущего потьзователя из чата
             chats.forEach(chat => {
-              console.log(activeChat, chat._id);
                 chat.users = chat.users.filter(user => user._id !==users[0]);
                 chat.isActive = activeChat === chat._id ? true : false
             })
@@ -69,6 +70,7 @@ import { deleteAllSms, resetMessages } from "./messagesSlice"
       const {data } = await axios.delete(`${CHATSROUTE}${action}`)
       console.log(data);
         dispatch(deleteAllSms())
+        dispatch(deleteChatFromCurrentUser({chatId: action}))
         return {id: action, isDelete: data.isDelete}
     }
   )
@@ -80,6 +82,18 @@ export const chatSlice = createSlice({
   name: "chats",
   initialState,
   reducers: {
+    decreaseCounter: (state, action: PayloadAction<{chatId: ChatModel['_id']}>) => {
+      console.log('1234567890');
+      
+      
+      state.container = state.container.map(chat => {
+        console.log(chat._id, action.payload.chatId);
+        if(chat._id === action.payload.chatId){
+          return {...chat, unreadMessageCount: chat.unreadMessageCount - 1}
+        }
+        return chat
+      })
+    },
     activateChat: (state, action: PayloadAction<ChatModel['_id']>) => {
       state.container.forEach((chat) => {
         chat._id === action.payload
@@ -120,4 +134,4 @@ export const chatSlice = createSlice({
 
 export default chatSlice.reducer
 
-export const { activateChat, addMessageToChat, disactivateChat } = chatSlice.actions
+export const { activateChat, addMessageToChat, disactivateChat, decreaseCounter } = chatSlice.actions

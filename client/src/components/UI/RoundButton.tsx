@@ -1,5 +1,6 @@
 import React, {useState, ReactNode, MouseEvent} from 'react'
 import { Info } from './Info'
+import { ArrowPathIcon } from '@heroicons/react/24/solid'
 
 interface RoundButton {
     d?: number
@@ -7,6 +8,7 @@ interface RoundButton {
     icon: ReactNode
     disabled?: boolean
     className?: string
+    isLoading?: boolean
     title: string
     onClick?: (e:MouseEvent)=>void
 }
@@ -15,22 +17,30 @@ export const RoundButton = ({
     d = 8,
     icon,
     disabled = false,
+    isLoading = false,
     type,
     title,
     className='bg-blue-400',
     onClick = () =>{}
 }:RoundButton) => {
 
-    const [isOpen, setOpen] = useState(false)
+
+    const [isActive, setActive] = useState(false)
 
   return (
     <div className='relative group'>
         <button className={`${className}  rounded-full w-${d} h-${d} flex justify-center items-center shadow-light duration-200 active:scale-90`}
             type = {type}
             disabled = {disabled}
-            onClick={(e)=>{onClick(e)}}   
+            onClick={(e)=>{setActive(true); onClick(e)}}   
         >   
-            {icon}
+        {
+            isLoading&&isActive ? 
+            <ArrowPathIcon className=' animate-spin w-6 h-6 text-white'/>
+            :
+            <>{icon}</>
+        }
+
         </button>
         {
             title &&

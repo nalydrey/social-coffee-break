@@ -4,6 +4,7 @@ import { EllipsisHorizontalCircleIcon, EllipsisHorizontalIcon, EllipsisVerticalI
 import { MenuItem } from '../UI/MenuItem'
 import { Tooltip } from '../UI/Tooltip'
 import { URL } from '../../http'
+import { ImageWithPreloader } from '../UI/ImageWithPreloader'
 
 interface FriendPeviewProps {
     title: string,
@@ -42,9 +43,13 @@ export const FriendPreview = ({
 
   return (
     <div className='rounded-lg shadow-light max-w-[270px]'>
-        <div className='relative justify-end flex gap-2 items-center rounded-t-lg p-2 bg-cover bg-center bg-indigo-500  ' style={{backgroundImage: `url(${picture && host+picture})`}}>
+        <div className='relative justify-end flex gap-2 items-center rounded-t-lg p-2 bg-cover bg-center bg-indigo-500  ' 
+        // style={{backgroundImage: `url(${picture && host+picture})`}}
+        >
+            <ImageWithPreloader className='img absolute left-0 top-0 rounded-t-lg' src={picture ? host+picture : defaultAva} alt="" />   
             <div className='absolute bottom-0 left-3 translate-y-1/3 w-14 h-14 rounded-full overflow-hidden outline-4 outline-gray-300 outline'>
-                <img className='img' src={avatar ? host+avatar : defaultAva} alt="" />
+                {/* <img className='img' src={avatar ? host+avatar : defaultAva} alt="" /> */}
+                <ImageWithPreloader className='img' src={avatar ? host+avatar : defaultAva} alt="" />
             </div>
             <div className='relative'>
                 <button className=' border rounded-full bg-slate-500 hover:rotate-180 duration-300'

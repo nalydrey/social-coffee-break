@@ -12,7 +12,7 @@ const route = new Router()
 route.post('/', createPost)
 route.get('/my/:userId', getMyPosts)
 route.get('/', getPosts)
-route.delete('/:postId', deletePost)
+route.delete('/:postId/:userId', deletePost)
 route.put('/like/:postId/:userId', setLike)
 
 export default route

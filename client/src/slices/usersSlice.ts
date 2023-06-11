@@ -22,8 +22,8 @@ import { isPayload, QueryPayload, queryString } from "../customFunctions/querySt
     export const getUsers = createAsyncThunk(
       "users/getUsers",
       async (payload: QueryPayload = {}) => {
-        console.log('get users');
-        console.log(payload);
+        // console.log('get users');
+        // console.log(payload);
         if(isPayload(payload)){
           const query = queryString(payload)
           const {data} = await axios.get(`${USERSROUTE}?${query}`)

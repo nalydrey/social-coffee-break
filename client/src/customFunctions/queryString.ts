@@ -8,11 +8,9 @@ export type QueryString = (object: QueryPayload) => string
 export const queryString: QueryString = (obj) => {
     const query = Object.entries(obj).map(field => {
         if(Array.isArray(field[1])){
-            console.log('arr');
             return field[1].map(elem => `${field[0]}=${elem}`).join('&')
         }
         else{
-            console.log('no');
             return `${field[0]}=${field[1]}`
         }
     }).join('&')

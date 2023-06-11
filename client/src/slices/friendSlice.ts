@@ -17,12 +17,10 @@ const initialState: Slice<UserModel> = {
 export const getFriends = createAsyncThunk(
     'friends/getFriends',
     async (friends: string[]) => {
-        console.log('getFriends');
+        // console.log('getFriends');
         if(friends.length){
             const query = queryString({_id: friends})
-            console.log(query);
             const {data} = await axios.get<{users: UserModel[]}>(`${USERSROUTE}?${query}`) 
-            console.log(data);
             return {friends: data.users}
         }
         return {friends: []}
@@ -35,8 +33,6 @@ export const deleteUserFromFriends = createAsyncThunk(
         console.log(friendId, currentUserId);
         
         const {data} = await axios.put<{user: UserModel}>(`${USERSROUTE}friends/delete/${friendId}/${currentUserId}`)
-        console.log(data);
-        console.log(friendId);
         dispatch(deleteFriendFromCurrentUser({friendId: data.user._id}))
         dispatch(deleteFriendFromUsers({friendId, userId: currentUserId}))
         dispatch(deleteFriendFromUsers({friendId: currentUserId, userId: friendId}))
@@ -59,8 +55,12 @@ export const friendSlice = createSlice({
             .addCase(getFriends.fulfilled, (state, action) => {
                 state.container = action.payload.friends
             })
+            .addCase(deleteUserFromFriends.pending, (state, action) => {
+                state.isLoading = true
+            })
             .addCase(deleteUserFromFriends.fulfilled, (state, action) => {
                 state.container = state.container.filter(user => user._id !== action.payload.user._id) 
+                state.isLoading = false
             })
     }
 }) 

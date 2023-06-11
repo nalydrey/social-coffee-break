@@ -11,15 +11,23 @@ import { GetData, activateChat } from "../../slices/chatSlice"
 import { useNavigate } from "react-router-dom"
 import { MappingBox } from "../UI/MappingBox"
 import { RoundButton } from "../UI/RoundButton"
-import { ArrowDownTrayIcon, ChatBubbleLeftRightIcon, UserMinusIcon, UserPlusIcon, XCircleIcon } from "@heroicons/react/24/solid"
+import { ArrowDownTrayIcon, ArrowPathIcon, ChatBubbleLeftRightIcon, UserMinusIcon, UserPlusIcon, XCircleIcon } from "@heroicons/react/24/solid"
 import { cancelSuggestationToBeFriends, suggestToBeFriends } from "../../slices/suggestationSlice"
 import { deleteUserFromFriends } from "../../slices/friendSlice"
 import { ContentBox } from "../UI/ContentBox"
+import { UserCardSkeleton } from "../Preloaders/UserCardSkeleton"
+// import loader from '../../assets/__Iphone-spinner-1.gif'
+// import{ Loader as ReactComponent }from '../../assets/my-loader.svg'
+
 
 export interface Nav extends Pick<GetData, 'activeChat'|'isCreateNewChat'> {userId: UserModel['_id']}
 
 export const Users = () => {
     const users = useAppSelector<UserModel[]>((state) => state.users.container)
+    const isLoadingUsers = useAppSelector<boolean>((state) => state.users.isLoading)
+    const isLoadingSuggest = useAppSelector<boolean>((state) => state.suggestations.isLoading)
+    const isLoadingInvitations = useAppSelector<boolean>((state) => state.invitations.isLoading)
+    const isLoadingFriends = useAppSelector<boolean>((state) => state.friends.isLoading)
     const currentUser = useAppSelector<UserModel | null>((state) => state.currentUser.user)
     const dispatch = useAppDispatch()
 
@@ -97,9 +105,9 @@ export const Users = () => {
         className="grow"
     >
         <MappingBox 
-            isLoading = {false}
-            isAlternate = {false}
-            loadingComponent = 'Loading...'
+            isLoading = {isLoadingUsers}
+            isAlternate = {!users.length}
+            loadingComponent = {<UserCardSkeleton/>}
             alternateComponent = 'Пока нет пользователей'
         >
             <ul className='flex  gap-5'>
@@ -132,7 +140,7 @@ export const Users = () => {
                                         onClick={()=>handlerEnter(user._id)}   
                                     />
                                 }
-
+                               
                                 { 
                                 currentUser &&
                                 <>
@@ -140,6 +148,7 @@ export const Users = () => {
                                         !isI && !(isMyFriend || isMyInvitation || isMyRequest) &&
                                         <RoundButton 
                                             title='Пригласить в друзья' 
+                                            isLoading = {isLoadingSuggest}
                                             icon = {<UserPlusIcon className={`${iconSizeClass} text-white`}/>}
                                             onClick={() => handlerAddToFriends(user._id)}  
                                         />
@@ -148,6 +157,7 @@ export const Users = () => {
                                         !isI && isMyRequest &&
                                         <RoundButton 
                                             title='Отозвать приглашение'  
+                                            isLoading = {isLoadingSuggest}
                                             icon = {<UserMinusIcon className={`${iconSizeClass} text-white`}/>}
                                             onClick={() => handlerCancelSuggestation(user._id)}  
                                         />
@@ -157,11 +167,13 @@ export const Users = () => {
                                         <>  
                                             <RoundButton 
                                                 title='Принять приглашение'
+                                                isLoading={isLoadingInvitations}
                                                 icon = {<UserPlusIcon className={`${iconSizeClass} text-white`}/>}
                                                 onClick={()=>handlerAccept(user._id)}   
                                             />
                                             <RoundButton 
                                                 title='Отклонить приглашение' 
+                                                isLoading={isLoadingInvitations}
                                                 icon = {<UserMinusIcon className={`${iconSizeClass} text-white`}/>}
                                                 onClick={() => handlerReject(user._id)}     
                                             />
@@ -171,6 +183,7 @@ export const Users = () => {
                                         isMyFriend &&
                                         <RoundButton 
                                             title='Удалить из друзей'  
+                                            isLoading = {isLoadingFriends}
                                             icon = {<UserMinusIcon className={`${iconSizeClass} text-white`}/>}
                                             onClick={() =>  handlerDeleteFromFriends(user._id)}       
                                         />
