@@ -14,10 +14,12 @@ interface UserCardProps {
     postCounter: number
     children: ReactNode
     friendCounter: number
+    isOnline: boolean
 }
 
 export const UserCard = ({
     id,
+    isOnline,
     avatar,
     picture,
     children,
@@ -31,18 +33,24 @@ export const UserCard = ({
 
 
   return (
-    <li className='max-w-[250px] rounded-lg shadow-light   grow'>
+    <li className='max-w-[250px] rounded-lg shadow-light flex flex-col grow'>
         <div className='relative rounded-t-lg h-[110px] bg-green-300 bg-center bg-cover bg-no-repeat'
             //  style={{backgroundImage: `url(${picture ?  URL+'/'+ picture : ''})`}}   
         >
             <ImageWithPreloader className='img absolute rounded-t-lg' src={picture ? URL+picture : ''} alt="foto"/>
+
             <div className='border-4 border-slate-200 shadow-light absolute bottom-0 left-1/2 -translate-x-1/2 translate-y-1/2  overflow-hidden rounded-full w-32 h-32'>
                 {/* <img className='img' src={avatar ? URL+'/'+avatar : defaultFoto} alt="foto" /> */}
                 <ImageWithPreloader className='img' src={avatar ? URL+'/'+avatar : defaultFoto} alt="foto"/>
             </div>
+           { 
+            isOnline &&
+            <div className='w-5 h-5 rounded-full bg-green-600 absolute top-0 -translate-x-1/4 -translate-y-1/4 shadow-light'/>
+            }
+
         </div>
-        <div className='pt-16 rounded-b-lg bg-slate-200 p-5 flex flex-col gap-5'>
-            <h3 className='text-center text-2xl text-sky-700 font-bold'>{firstName} {lastName}</h3>
+        <div className='pt-16 rounded-b-lg bg-slate-200 p-5 flex flex-col gap-5 grow'>
+            <h3 className='text-center text-2xl text-sky-700 font-bold grow'>{firstName} {lastName}</h3>
             <div className='flex justify-around'>
                 <Score
                     title='Friends'

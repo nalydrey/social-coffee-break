@@ -4,20 +4,21 @@ export interface UserPrivate {
   firstName: string
   lastName: string
   nikName: string
-  age: number | null
-  gender: "male" | "female" | ""
+  age: number 
+  gender: "male" | "female" 
   password: string
   avatar: string
 }
 
 export interface UserContact {
   email: string
-  tel: string | null
+  tel: string 
 }
 
 export interface UserModel {
   readonly _id: string
   picture: string
+  isOnline: boolean
   private: UserPrivate
   contacts: UserContact
   chats: string[]

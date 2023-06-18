@@ -3,70 +3,67 @@ import { Users } from "./components/pages/Users"
 import { Chats } from "./components/pages/Chats"
 import { Header } from "./components/Layout/header"
 import { UserModel } from './models/UserModel'
-import { MainBar } from "./components/Layout/MainBar"
 import { changeMyAvatar, changeMyPicture, enter} from './slices/currentUserSlice'
-import { ContentBar } from "./components/Layout/ContentBar"
 import { Route, Routes, Link, useNavigate } from "react-router-dom"
 import { RegisterForm } from "./components/UI/RegisterForm"
 import { useAppDispatch, useAppSelector } from "./hooks/hooks"
 import { controlMessageModal } from "./slices/auxiliarySlice"
 import { Modal } from './components/UI/Modal'
 import { getLastElement } from './customFunctions/getLastElement'
-import { Friends } from './components/pages/Friends'
-import { Invitations } from './components/pages/Invitations'
 import { Profile } from './components/pages/Profile'
 import { MyPosts } from './components/pages/MyPosts'
 import { Posts } from './components/pages/Posts'
 import { TopBox } from './components/Layout/TopBox'
 import { FriendPreview } from './components/outputs/FriendPreview'
 import { MappingBox } from './components/UI/MappingBox'
-import {  getUsers } from './slices/usersSlice'
 import { MenuItem } from './components/UI/MenuItem'
-import { deleteUserFromFriends, getFriends } from './slices/friendSlice'
-import { acceptInvitation, getInvitations, rejectInvitation } from './slices/invitationSlice'
-import { cancelSuggestationToBeFriends, getSuggestations } from './slices/suggestationSlice'
+import { deleteUserFromFriends } from './slices/friendSlice'
+import { acceptInvitation, rejectInvitation } from './slices/invitationSlice'
+import { cancelSuggestationToBeFriends, } from './slices/suggestationSlice'
 import { ContentBox } from './components/UI/ContentBox'
 import { matchedValueInArr } from './customFunctions/isCoincidenceInArr'
-import { Nav } from './components/pages/Users'
+import {io} from 'socket.io-client'
+import { subscribes, unsubscribe } from './subscribes'
+import { userLoads } from './userLoads'
+import { getUsers } from './slices/usersSlice'
 
 
+
+export const socket = io('http://localhost:3010')
 
 function App() {
   const isRegisterActive: boolean = useAppSelector((state) => state.aux.messageModal.isActive)
   const currentUser = useAppSelector<UserModel | null>(state => state.currentUser.user)
+  const currentUserLoadings = useAppSelector<
+  {
+    isLoadingAvatar: boolean
+    isLoadingPicture: boolean
+  }>(state => state.currentUser.loadings)
   const friends = useAppSelector<UserModel[]>(state => state.friends.container)
   const invitations = useAppSelector<UserModel[]>(state => state.invitations.container)
   const suggestations = useAppSelector<UserModel[]>(state => state.suggestations.container)
+  const messageCounter = useAppSelector<number>(state => state.chats.messageCounter)
   const users = useAppSelector<UserModel[]>(state => state.users.container)
   const dispatch = useAppDispatch()
   const navigate = useNavigate()
 
+  const currentUserId = currentUser?._id || null
+
   useEffect(()=>{
     const userId = localStorage.getItem('currentUser')
     userId && dispatch(enter(userId)) 
+    dispatch(getUsers({})) 
   },[])
   
   useEffect(()=>{
-    dispatch(getUsers({})) 
-  },[])
-
-  useEffect(() => {
-    currentUser && 
-    dispatch(getFriends(currentUser.friends)) 
-  }, [currentUser?._id || ''])
-  
-  useEffect(() => {
-    currentUser &&
-    dispatch(getInvitations(currentUser.invitations)) 
-  }, [currentUser?._id || ''])
-
-  useEffect(() => {
-    currentUser &&
-    dispatch(getSuggestations(currentUser.myRequests)) 
-  }, [currentUser?._id || ''])
-
- 
-
+    console.log('!!!!!!11111111111WAAAAAAa');
+    
+   if (currentUser){
+      subscribes(dispatch, currentUser)
+      userLoads(dispatch, currentUser)
+    }
+    return () => {unsubscribe()}
+  },[currentUserId])
 
 
   const closeRegisterForm: ()=>void = () => {
@@ -91,7 +88,7 @@ function App() {
 
   const goToChat: (userId: string) => void = (userId) => {
     if(currentUser){
-        const state: Nav = {
+        const state = {
             isCreateNewChat: false,
             activeChat: '',
             userId
@@ -153,6 +150,9 @@ const handlerAccept = (id:string) => {
                     avatar={currentUser?.private.avatar || ''}
                     firstName={currentUser?.private.firstName || ''}
                     lastName={currentUser?.private.lastName || ''}
+                    isLoadingAvatar={currentUserLoadings.isLoadingAvatar}
+                    isLoadingPicture={currentUserLoadings.isLoadingPicture}
+                    messageCounter={messageCounter}
                     onChangePicture={changePicture}
                     onChangeAvatar={changeAvatar}
             />

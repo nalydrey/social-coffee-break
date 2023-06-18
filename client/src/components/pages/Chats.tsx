@@ -1,26 +1,22 @@
-import React, {useEffect} from 'react'
+import {useEffect} from 'react'
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useAppDispatch, useAppSelector } from '../../hooks/hooks';
-import {  Chat, activateChat, deleteChat, disactivateChat, getMyChats } from '../../slices/chatSlice';
-import { ChatModel } from '../../models/ChatModel';
-import { URL } from '../../http';
-import defaultFoto from '../assets/defaultAva.png'
+import {  Chat, activateChat, decreaseCounter, deleteChat, disactivateChat, getMyChats } from '../../slices/chatSlice';
+import type { ChatModel } from '../../models/ChatModel';
+import type { Message } from '../../models/MessageModel';
+import type { UserModel } from '../../models/UserModel';
 import { useFormik } from 'formik';
 import * as Yup from 'yup'
-import { createMessage, createTempMessage, deleteMessage, getMessages, readMessage, resetMessages } from '../../slices/messagesSlice';
-import { Message } from '../../models/MessageModel';
-import { Slice } from '../../models/Slice';
+import { createTempMessage, deleteMessage, getMessages, resetMessages } from '../../slices/messagesSlice';
 import moment from 'moment'
 import { MessageCard } from '../outputs/MessageCard';
 import { ChatCard } from '../outputs/ChatCard';
-import { UserModel } from '../../models/UserModel';
 import { ContentBox } from '../UI/ContentBox';
 import { MappingBox } from '../UI/MappingBox';
 import { RoundButton } from '../UI/RoundButton';
 import { PaperAirplaneIcon } from '@heroicons/react/24/solid';
-import { useOnScreen } from '../../hooks/useOnScreen';
 import { nanoid } from '@reduxjs/toolkit';
-
+import { socket } from '../../App';
 
 
 
@@ -38,7 +34,7 @@ export const Chats = () => {
         onSubmit: (value, helpers) => {
             if(currentUser){
                 const createdId = nanoid()
-                // console.log(new Date());
+                const date = new Date().toISOString()
                 
                 dispatch(createTempMessage({
                     _id: 'temp', 
@@ -47,16 +43,16 @@ export const Chats = () => {
                     chat: currentChat,
                     isRead: false,
                     text: formik.values.message,
-                    createdAt: new Date(),
-                    updatedAt: new Date(),
+                    createdAt: date,
+                    updatedAt: date,
                 }))
 
-                dispatch(createMessage({
-                    createdId,
-                    user: currentUser._id, 
-                    chat: currentChat, 
-                    text: formik.values.message}))
-
+                socket.emit('sendMessage', {
+                        createdId,
+                        user: currentUser._id, 
+                        chat: currentChat, 
+                        text: formik.values.message
+                        })
                 helpers.resetForm()
             }
         }
@@ -75,15 +71,7 @@ export const Chats = () => {
     
 
     useEffect(()=>{
-        if(currentUser){
-            dispatch(getMyChats({
-                isCreateNewChat: state?.isCreateNewChat || false,
-                activeChat: state?.activeChat || null,
-                users: [currentUser._id, state?.userId || null]
-            }))
-        } else{
-            navigate('/users')
-        }
+        !currentUser &&  navigate('/users')
         return () => {
             dispatch(disactivateChat())
         }
@@ -98,14 +86,19 @@ export const Chats = () => {
         }
     },[currentChat])
 
-    const handlerOnVisible = (messageId: string, messageUser: string, isRead: boolean) => {
-        console.log(currentUser?._id !== messageUser);
-        
+    const handlerOnVisible = (messageId: string, messageUser: string, isRead: boolean, chatId: string) => {
         if(currentUser?._id !== messageUser && !isRead){
-            dispatch(readMessage(messageId))
-
+            socket.emit('readMessage', {messageId, chatId})
+            dispatch(decreaseCounter({chatId}))
         }
-        
+    }
+    
+    const handlerOnDeleteMessage = (messageId: string, chatId: string) => {
+       socket.emit('deleteMessage', {messageId, chatId})
+    }
+
+    const handlerOnDeleteChat = (chatId: string) => {
+        socket.emit('deleteChat', {chatId})
     }
     
 
@@ -123,19 +116,21 @@ export const Chats = () => {
                 loadingComponent = 'Loading...'
             >
                 { chats.map((chat) => {
-                    const {avatar, firstName} = chat.users[0].private
-                    return (
-                        <ChatCard
-                            key={chat._id}
-                            chatId={chat._id}
-                            avatar={avatar}
-                            unreadMessage = {chat.unreadMessageCount}
-                            firstName={firstName}
-                            isActive={chat.isActive}
-                            onClick={(chatId)=>{dispatch(activateChat(chatId))}}
-                            onDelete={(chatId)=>{dispatch(deleteChat(chatId))}}
-                        />
-                    )
+                    if(chat.users.length) {
+                        const {avatar, firstName} = chat.users[0].private
+                        return (
+                            <ChatCard
+                                key={chat._id}
+                                chatId={chat._id}
+                                avatar={avatar}
+                                unreadMessage = {chat.unreadMessageCount}
+                                firstName={firstName}
+                                isActive={chat.isActive}
+                                onClick={(chatId)=>{dispatch(activateChat(chatId))}}
+                                onDelete={handlerOnDeleteChat}
+                            />
+                        )
+                    }
                 })}
 
             </MappingBox>
@@ -150,20 +145,20 @@ export const Chats = () => {
                     <ul className={`max-h-[500px] flex flex-col gap-3 h-[100%] overflow-y-auto pr-2 ${currentChat ? 'pb-14':''}`}>
                         { currentUser &&
                             messages.map(message => {
-                                
+                                const userIsObject = (typeof message.user === 'object')
                                 return(
                                     <MessageCard 
-                                        isMyMessage={currentUser._id === message.user._id}
+                                        isMyMessage={userIsObject && currentUser._id === message.user._id}
                                         key={message.createdId}
                                         messageId={message._id}
                                         text={message.text}
                                         isSending = {isSending && message._id === 'temp'}
                                         isRead = {message.isRead}
-                                        isDeleteButton = {currentUser._id === message.user._id}
-                                        avatar={message.user.private.avatar}
+                                        isDeleteButton = { userIsObject && currentUser._id === message.user._id}
+                                        avatar={ userIsObject ? message.user.private.avatar : ''}
                                         time={moment(message.createdAt).format('D MMM HH:mm')}
-                                        onDelete={(messageId)=>{dispatch(deleteMessage(messageId))}}
-                                        onVisible={()=> handlerOnVisible(message._id, message.user._id, message.isRead )}
+                                        onDelete={() => handlerOnDeleteMessage(message._id, message.chat)}
+                                        onVisible={()=> (typeof message.user === 'object') && handlerOnVisible(message._id, message.user._id, message.isRead, message.chat )}
                                     />
                                 )
                             }

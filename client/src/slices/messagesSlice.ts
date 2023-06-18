@@ -1,20 +1,13 @@
 import { PayloadAction, createAsyncThunk, createSlice } from "@reduxjs/toolkit"
-import { Message } from "../models/MessageModel"
+import type { Message } from "../models/MessageModel"
+import type { Slice } from "../models/Slice"
+import type { UserModel } from "../models/UserModel"
 import axios from "axios"
-import { useHttp } from "../hooks/useHttp"
-import { CHATSROUTE, MESSAGEROUTE } from "../http"
+import { MESSAGEROUTE } from "../http"
 import { ChatModel } from "../models/ChatModel"
-import { addMessageToChat, decreaseCounter } from "./chatSlice"
-import { Slice } from "../models/Slice"
-import { UserModel } from "../models/UserModel"
-import { nanoid } from "@reduxjs/toolkit"
+import {  decreaseCounter, increaseCounter } from "./chatSlice"
 
-interface CreateMessagePayload {
-  createdId: string
-  user: UserModel['_id']
-  chat: ChatModel['_id']
-  text: string
-}
+
 
 interface MessageSliceModel extends Slice<Message> {
   isSending: boolean
@@ -26,68 +19,38 @@ const initialState: MessageSliceModel = {
   isSending: false
 }
 
-export const loadAllSms = createAsyncThunk("messages/loadAllSms", async () => {
-  const data: Message[] = await useHttp(MESSAGEROUTE, "GET")
-  return data
-})
-
-export const loadChatSms = createAsyncThunk(
-  "messages/loadChatSms",
-  async (chatId: string) => {
-    console.log(chatId)
-    
-    const sms: Message[] = await useHttp(
-      `${MESSAGEROUTE}?chat=${chatId}`,
-      "GET",
-    )
-    return sms
-  },
-)
-
-export const createMessage= createAsyncThunk(
-  "messages/createMessage",
-  async (payload: CreateMessagePayload, { dispatch }) => {
-    console.log('createMessage');
-    
-    // console.log('userId', payload.user);
-    // console.log('chatId', payload.chat);
-    // console.log('text', payload.text);
-    
-    const {data} = await axios.post<{message: Message}>(MESSAGEROUTE, payload)
-    console.log(data.message);
-    return data.message
-  },
-)
 
 export const getMessages = createAsyncThunk(
   "messages/getMessages",
-  async (payload: { chat: ChatModel['_id'] }, { dispatch }) => {
-    console.log('getMessage');
-    console.log(payload.chat);
-    
-    const {data} =await axios.get(`${MESSAGEROUTE}/chat/${payload.chat}`)
-    console.log(data);
-    
+  async ({chat}: { chat: string }, { dispatch }) => {
+    const {data} =await axios.get(`${MESSAGEROUTE}/chat/${chat}`)
     return data.messages
   },
 )
 
-export const deleteMessage = createAsyncThunk(
-  "messages/deleteMessage",
-  async (messageId: string, { dispatch }) => {
-    const { data } = await axios.delete(`${MESSAGEROUTE}${messageId}`)
-    data.isDelete && dispatch(deleteSms(messageId))
-  },
+export const createMessage = createAsyncThunk(
+  'messages/createMessage',
+  (message: Message, {getState, dispatch}) => {
+    const state: any = getState()
+    const chats: ChatModel[] = state.chats.container 
+    const currentUser: UserModel = state.currentUser.user
+    const chat = chats.find(chat => chat._id === message.chat)
+    if(chat && typeof message.user === 'object'){
+      if (currentUser._id !== message.user._id) dispatch(increaseCounter({chatId: message.chat}))
+      if(chat.isActive) return {message}
+    }
+    return {message: null}
+  }
 )
 
-export const readMessage = createAsyncThunk(
-  'messages/readMessage',
-  async (messageId: string, {dispatch}) => {
-    const {data} = await axios.put<{message: Message}>(`${MESSAGEROUTE}read/${messageId}`)
-    dispatch(decreaseCounter({chatId: data.message.chat}))
-    return {messageId}
-  }
-) 
+export const deleteMessage = createAsyncThunk(
+  "messages/deleteMessage",
+  async ({message, currentUserId}: {message: Message, currentUserId: string}, { dispatch, getState }) => {
+    if(typeof message.user === 'string' )
+    message.user !== currentUserId && !message.isRead && dispatch(decreaseCounter({chatId: message.chat}))
+    return {messageId: message._id}
+  },
+)
 
 export const messagesSlice = createSlice({
   name: "messages",
@@ -96,32 +59,38 @@ export const messagesSlice = createSlice({
     createTempMessage: (state, action: PayloadAction<Message>) => {
       state.container.push(action.payload)
     },
-    deleteSms: (state, action: PayloadAction<string>) => {
-      state.container = state.container.filter(message => message._id !== action.payload )
+
+    readMessage: (state, action: PayloadAction<{messageId: string}>) => {
+      const sms = state.container.find(message => message._id === action.payload.messageId )
+      if(sms) sms.isRead = true
     },
+
     resetMessages: (state) => {
       state.container = []
     },
-    deleteAllSms:(state) => {
-      state.container = []
-    }
   },
+
   extraReducers: (builder) => {
     builder
       .addCase(createMessage.pending, (state, action)=>{
         state.isSending = true
       })
       .addCase(createMessage.fulfilled, (state, action) => {
-
-        state.container = state.container.map(message => {
-          
-          if(message.createdId === action.payload.createdId) {
-            return action.payload
+        const {message} = action.payload
+        console.log(message);
+          if(message){
+            if(state.container.some(sms => sms.createdId === message.createdId)){
+              state.container = state.container.map( sms => {
+                return sms.createdId === message.createdId ? message : sms
+              } )
+            } 
+            else{
+              state.container.push(message)
+            }
           }
-          return message
-        })
-        state.isSending = false
+          state.isSending = false
       })
+
       .addCase(getMessages.pending, (state, action) => {
         state.isLoading = true
       })
@@ -129,16 +98,17 @@ export const messagesSlice = createSlice({
         state.container = action.payload
         state.isLoading = false
       })
-      .addCase(readMessage.fulfilled, (state, action) => {
-        state.container.forEach(message => {
-          if(message._id === action.payload.messageId){
-            message.isRead = true
-          }
-        })
+      .addCase(deleteMessage.fulfilled, (state, action) => {
+        state.container = state.container.filter(message => message._id !== action.payload.messageId)
       })
+      
   },
 })
 
 export default messagesSlice.reducer
 
-export const {deleteSms, deleteAllSms, resetMessages, createTempMessage} = messagesSlice.actions
+export const {
+  resetMessages,
+  createTempMessage,
+  readMessage
+} = messagesSlice.actions

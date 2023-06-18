@@ -6,6 +6,7 @@ import { RoundButton } from '../UI/RoundButton'
 import { ButtonUnderline } from '../UI/ButtonUnderline'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { ImageWithPreloader } from '../UI/ImageWithPreloader'
+import { DotsPreloader } from '../Preloaders/DotsPreloader'
 
 interface TopBoxProps {
     onChangeAvatar: (e: ChangeEvent<HTMLInputElement>)=>void
@@ -14,16 +15,22 @@ interface TopBoxProps {
     picture: string
     firstName: string
     lastName: string
+    messageCounter: number
+    isLoadingAvatar?: boolean
+    isLoadingPicture?: boolean
 }
 
 
 export const TopBox = ({
     onChangeAvatar=()=>{},
     onChangePicture=()=>{},
+    isLoadingAvatar,
+    isLoadingPicture,
     picture,
     avatar,
     firstName,
-    lastName
+    lastName,
+    messageCounter,
 }:TopBoxProps) => {
 
     const navigate = useNavigate()
@@ -43,7 +50,14 @@ export const TopBox = ({
         <div className='relative pt-[20%] bg-indigo-400 w-full bg-cover bg-center bg-no-repeat'
             //  style={style}   
         >
-            <ImageWithPreloader className=' absolute top-0' src={`${picture ? URL+'/'+picture : ''}`} alt='picture'/>
+            <ImageWithPreloader 
+                className=' absolute top-0' 
+                src={`${picture ? URL+'/'+picture : ''}`} 
+                alt='picture'
+            />
+            {   isLoadingPicture &&
+                    <DotsPreloader className='absolute top-0'/>
+            }
             <div className='absolute bottom-0 right-0 px-5 translate-y-1/2 z-10 flex gap-3'>
                 <label htmlFor="avatar" className=' bg-orange-500 block p-2 rounded-full cursor-pointer duration-300 hover:scale-125'>
                     <CameraIcon className="h-7 w-7 text-blue-800 cursor-pointer" />
@@ -75,6 +89,9 @@ export const TopBox = ({
                              src={avatar ? URL + '/' + avatar : defaultFoto} 
                              alt="avatar" 
                         />
+                        {   isLoadingAvatar &&
+                            <DotsPreloader className='absolute top-0'/>
+                        }
                     </div>
                     <div className='flex text-3xl font-bold text-sky-700 gap-2'>
                         <span>{firstName}</span>
@@ -87,7 +104,7 @@ export const TopBox = ({
                 <ButtonUnderline
                     title='Profile data'
                     isActive={location.pathname === '/profile'}
-                    onClick={()=>{navigate('profile')}}
+                    onClick={()=>{navigate('/')}}
                 />
                 <ButtonUnderline
                     title='People'
@@ -106,6 +123,7 @@ export const TopBox = ({
                 />
                 <ButtonUnderline
                     title='Chats'
+                    label={messageCounter}
                     isActive={location.pathname === '/chats'}
                     onClick={()=>{navigate('chats')}}
                 />

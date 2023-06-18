@@ -53,7 +53,7 @@ export const MessageCard = ({messageId,
   
   return (
     <li 
-      className={`flex gap-2 relative mr-2 mt-2 rounded-lg duration-300 ${(!isRead && !isMyMessage) ? 'bg-green-500/30': ''}`}
+      className={`flex gap-2 relative mr-3 mt-2 rounded-lg duration-300 `}
       ref = {messageRef}
     >
         <div className='w-10 h-10 border border-sky-700 rounded-full overflow-hidden'>
@@ -65,16 +65,18 @@ export const MessageCard = ({messageId,
             </p>
            
             <div className='text-sm text-end mt-1 flex justify-between'>
-            {
-              isRead && isMyMessage ?
+
+            { isMyMessage ?
+              (isRead && isMyMessage ?
               <p>Прочитано</p>
               :
               isSending ?
               <p>отправление...</p>
               :
-              <p>доставлено</p>
+              <p>доставлено</p>)
+              :
+              <p></p>
             }
-            
               <p>{time}</p>
             </div>
         </div>

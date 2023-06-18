@@ -51,17 +51,20 @@ export const Post = ({
         ><TrashIcon className='w-5 fill-none stroke-white stroke-2'/>
         </button>
         <h3 className='text-center text-3xl font-medium'>{name}</h3>
-        <SimpleSlider dur={300}>
-            {images.map( image => {
-               return (
-                    <ImageWithPreloader 
-                        src={URL+image}
-                        alt='Image'
-                    />
-                )
-                })
-            }
-        </SimpleSlider>
+        {
+            !!images.length &&
+            <SimpleSlider dur={300}>
+                {images.map( image => {
+                return (
+                        <ImageWithPreloader 
+                            src={URL+image}
+                            alt='Image'
+                        />
+                    )
+                    })
+                }
+            </SimpleSlider>
+        }
         <div className='flex gap-10 select-none'>
             <div className='flex gap-2 cursor-pointer'
                 onClick={()=>(onLikeDislike(true))}
@@ -80,10 +83,15 @@ export const Post = ({
         <div className='flex items-center gap-3 justify-end'>
             <div className='w-10 h-10 rounded-full overflow-hidden shadow-light border border-gray-300'>
                 {/* <img className='img' src={user.private.avatar ? URL+user.private.avatar : defaultAvatar} alt="Avatar" /> */}
-                <ImageWithPreloader className='img' src={user.private.avatar ? URL+user.private.avatar : defaultAvatar} alt="Avatar" />
+                <ImageWithPreloader className='img' src={(user && user.private.avatar) ? URL+user.private.avatar : defaultAvatar} alt="Avatar" />
             </div>
             <div className='flex flex-col'>
-                <p className='border-b-2 border-b-gray-500'>{user.private.firstName} {user.private.lastName}</p>
+                {
+                    user ?
+                    <p className='border-b-2 border-b-gray-500'>{user.private.firstName} {user.private.lastName}</p>
+                    :
+                    <p className='border-b-2 border-b-gray-500'>user is deleted</p>
+                }
                 <p className=''>{moment(createdAt).format('D MMM HH:mm')}</p>
             </div>
         </div>

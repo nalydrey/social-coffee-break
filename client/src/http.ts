@@ -1,5 +1,4 @@
-export const URL = "http://localhost:3010/"
-// export const URL = "http://185.252.24.27:3010/"
+export const URL = `${import.meta.env.VITE_HOST}:${import.meta.env.VITE_PORT}/`
 
 //Chats
 export const CHATSROUTE = `${URL}chats/`

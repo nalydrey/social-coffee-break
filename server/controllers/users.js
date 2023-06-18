@@ -1,5 +1,7 @@
 import { log } from 'console';
 import User from '../models/users.js';
+import Chat from '../models/chat.js'
+import Message from '../models/message.js'
 import fs from 'fs'
 
 
@@ -84,10 +86,12 @@ export const deleteUser = async (req, res) => {
     try {
         console.log('deleteUser');
         const {userId} = req.params
+        //Удаление пользователя
         const deletedUser = await User.findByIdAndDelete(userId)
         console.log(deletedUser);
         const oldPicture = deletedUser.picture || 'some'
         const oldAvatar = deletedUser.private.avatar || 'some'
+        //Удаление аватара пользователя
         if (fs.existsSync(`uploads/${oldAvatar}`)) {
             fs.unlink(`uploads/${oldAvatar}`, (err)=>{
                 if(err){
@@ -99,6 +103,7 @@ export const deleteUser = async (req, res) => {
                 }
             })
         }
+        //Удаление фонового рисунка пользователя
         if (fs.existsSync(`uploads/${oldPicture}`)) {
             fs.unlink(`uploads/${oldPicture}`, (err)=>{
                 if(err){
@@ -110,6 +115,12 @@ export const deleteUser = async (req, res) => {
                 }
             })
         }
+        //Удаление чатов пользователя
+        console.log(deletedUser);
+        const chats = await Chat.deleteMany({_id: deletedUser.chats})
+        console.log(chats);
+        //Удаление сообщений удаленныъ чатов
+        await Promise.all(deletedUser.chats.map(chat =>  Message.deleteMany({chat})))
 
         res.json({deletedUser})
     } catch (error) {

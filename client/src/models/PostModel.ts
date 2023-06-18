@@ -2,7 +2,7 @@ import { UserModel } from "./UserModel"
 
 export interface PostModel {
     readonly _id: string
-    user: UserModel
+    user: UserModel | null
     name: string
     discription: string
     images: string[]

@@ -55,6 +55,14 @@ const userSchema = mongoose.Schema(
             }
         ],
         infoMessages: [String],
+        isOnline: {
+            type: Boolean,
+            default: true
+        },
+        socketId: {
+            type: String,
+            default: ''
+        },
         contacts: {
             email: {
                 type: String,

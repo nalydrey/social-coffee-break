@@ -4,15 +4,22 @@ import { UserModel } from "../models/UserModel"
 import { EditUserForm } from "../components/pages/Profile"
 import { RegisterFormNames } from "../components/UI/RegisterForm"
 import { PayloadAction, createAsyncThunk, createSlice } from "@reduxjs/toolkit"
+import { boolean } from "yup"
 
-export interface CurrentUserState {
+import { socket } from "../App"
+
+export type CurrentUserState = {
   user: UserModel | null,
-  isLoading: boolean,
+  loadings: {[key: string]: boolean},
 }
 
 const initialState: CurrentUserState = {
   user: null,
-  isLoading: false,
+  loadings: {
+    isLoadingAvatar: false,
+    isLoadingPicture: false
+  },
+  
 } 
 
 export const enter = createAsyncThunk("currentUser/enter", async (userId: string) => {
@@ -95,15 +102,24 @@ export const currentUserSlice = createSlice({
     builder
       .addCase(enter.fulfilled, (state, action) =>{
         state.user = action.payload
-        state.isLoading = false
+        state.loadings.isLoadingAvatar = false
+      })
+      .addCase(changeMyAvatar.pending, (state, action) =>{
+        state.loadings.isLoadingAvatar = true
       })
       .addCase(changeMyAvatar.fulfilled, (state, action) =>{
         if(state.user)
           state.user.private.avatar = action.payload
+          state.loadings.isLoadingAvatar = false
+
+      })
+      .addCase(changeMyPicture.pending, (state, action) =>{
+        state.loadings.isLoadingPicture = true
       })
       .addCase(changeMyPicture.fulfilled, (state, action) =>{
         if(state.user)
           state.user.picture = action.payload
+          state.loadings.isLoadingPicture = false
       })
       .addCase(createUser.fulfilled, (state, action) =>{
         state.user = action.payload.user

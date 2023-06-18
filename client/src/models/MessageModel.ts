@@ -3,10 +3,10 @@ import { UserModel } from "./UserModel"
 export interface Message{
   readonly _id: string
   readonly createdId: string
-  readonly user: UserModel
+  readonly user: UserModel | string
   readonly chat: string
   isRead: boolean
   text: string
-  createdAt: Date
-  updatedAt: Date
+  createdAt: Date | string
+  updatedAt: Date | string
 }

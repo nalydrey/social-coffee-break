@@ -7,20 +7,17 @@ import { enter } from "../../slices/currentUserSlice"
 import { acceptInvitation, rejectInvitation } from "../../slices/invitationSlice"
 import { getUsers } from "../../slices/usersSlice"
 import { matchedValueInArr } from "../../customFunctions/isCoincidenceInArr"
-import { GetData, activateChat } from "../../slices/chatSlice"
 import { useNavigate } from "react-router-dom"
 import { MappingBox } from "../UI/MappingBox"
 import { RoundButton } from "../UI/RoundButton"
-import { ArrowDownTrayIcon, ArrowPathIcon, ChatBubbleLeftRightIcon, UserMinusIcon, UserPlusIcon, XCircleIcon } from "@heroicons/react/24/solid"
+import { AcademicCapIcon, ArrowDownTrayIcon, ChatBubbleLeftRightIcon, UserMinusIcon, UserPlusIcon, XCircleIcon } from "@heroicons/react/24/solid"
 import { cancelSuggestationToBeFriends, suggestToBeFriends } from "../../slices/suggestationSlice"
 import { deleteUserFromFriends } from "../../slices/friendSlice"
 import { ContentBox } from "../UI/ContentBox"
 import { UserCardSkeleton } from "../Preloaders/UserCardSkeleton"
-// import loader from '../../assets/__Iphone-spinner-1.gif'
-// import{ Loader as ReactComponent }from '../../assets/my-loader.svg'
+import { socket } from "../../App"
 
 
-export interface Nav extends Pick<GetData, 'activeChat'|'isCreateNewChat'> {userId: UserModel['_id']}
 
 export const Users = () => {
     const users = useAppSelector<UserModel[]>((state) => state.users.container)
@@ -34,12 +31,12 @@ export const Users = () => {
     const navigate = useNavigate()      
 
     useEffect(() => {
-      dispatch(getUsers())
+      dispatch(getUsers({}))
     }, [])
 
     const goToChat: (userId: string) => void = (userId) => {
         if(currentUser){
-            const state: Nav = {
+            const state = {
                 isCreateNewChat: false,
                 activeChat: '',
                 userId
@@ -48,14 +45,22 @@ export const Users = () => {
             const userChats = users.find((user) => user._id === userId)?.chats
             if (userChats) {
                 const matchedChat = matchedValueInArr(currentUser.chats, userChats)
+                console.log('matchedChat ', matchedChat);
+                
                 if (matchedChat) {
                 //переходим в чат
+                console.log('111');
+                
                 state.isCreateNewChat = false
                 state.activeChat = matchedChat
                 } 
                 else {
                 //Создаем новый чат
-                state.isCreateNewChat = true
+                // state.isCreateNewChat = true
+                    console.log('Ctr');
+                    
+                socket.emit('createNewChat', {userTransmitter: currentUser._id, userReceiver: userId})
+
                 }
                 navigate("/chats", {state})
             }
@@ -81,6 +86,7 @@ export const Users = () => {
     }
     
     const handlerEnter = (id:string) => {
+        currentUser && socket.emit('quitUser',{userId: currentUser._id})
         dispatch(enter(id)); 
         localStorage.setItem("currentUser", id)
     }
@@ -97,6 +103,14 @@ export const Users = () => {
     const handlerDeleteFromFriends = (id:string) => {
         if(currentUser)
         dispatch(deleteUserFromFriends({friendId: id, currentUserId: currentUser._id}))
+    }
+
+
+    const handlerTest = (id:string) => {
+        if(currentUser){
+            console.log(currentUser._id, id);
+            socket.emit('emiter', {userTransmitter: currentUser._id, userReceiver: id})
+        }
     }
 
   return (
@@ -124,6 +138,7 @@ export const Users = () => {
                         return (
                             <UserCard 
                                 key={user._id}
+                                isOnline={user.isOnline}
                                 id={user._id}
                                 avatar={user.private.avatar}
                                 picture={user.picture}

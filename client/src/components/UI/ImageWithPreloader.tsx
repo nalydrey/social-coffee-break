@@ -16,6 +16,8 @@ export const ImageWithPreloader = ({
 
     const [isLoading, setIsLoading] = useState(true)
 
+    useEffect(()=>{setIsLoading(true)},[src])
+
   return (
     <>
             <img 

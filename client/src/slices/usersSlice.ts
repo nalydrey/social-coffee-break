@@ -13,8 +13,7 @@ import { isPayload, QueryPayload, queryString } from "../customFunctions/querySt
 
 
 
-
-    const initialState: Slice<UserModel> = {
+    const initialState: Slice<UserModel>= {
         container: [],
         isLoading: false,
     }
@@ -49,6 +48,18 @@ const users = createSlice({
   name: "users",
   initialState,
   reducers: {
+    connectUser: (state, action: PayloadAction<{userId: string}>) => {
+      const user = state.container.find(user => user._id === action.payload.userId)
+      if(user) {
+        user.isOnline = true
+      }
+    },
+    disconnectUser: (state, action: PayloadAction<{userId: string}>) => {
+      const user = state.container.find(user => user._id === action.payload.userId)
+      if(user) {
+        user.isOnline = false
+      }
+    },
     addFriendToUsers: (state, action: PayloadAction<{friendId: string, userId: string}>) => {
       state.container.forEach(user => {
         if(user._id === action.payload.userId) user.friends.push(action.payload.friendId) 
@@ -89,4 +100,4 @@ const users = createSlice({
 
 export default users.reducer
 
-export const { addChat, deleteFriendFromUsers, addFriendToUsers } = users.actions
+export const { addChat, deleteFriendFromUsers, addFriendToUsers, connectUser, disconnectUser } = users.actions

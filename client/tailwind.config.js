@@ -26,7 +26,7 @@ export default {
           '100%': {transform: 'translate(100%, 0%)'}
         },
         apearOpacity: {
-          '0%': {opacity: '0'},
+          '0%': {opacity: '.7'},
           '100%': {opacity: '1'}
         }
       }
