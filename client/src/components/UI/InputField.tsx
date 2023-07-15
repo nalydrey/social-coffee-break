@@ -12,7 +12,7 @@ interface InputProps {
   error?: boolean | string
   id: string
   label: string
-  type?: 'text' | 'password' | 'number'
+  type?: 'text' | 'password' | 'number' | 'email'
 }
 
 export const InputField = ({

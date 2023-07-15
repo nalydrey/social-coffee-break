@@ -80,8 +80,8 @@ export const Profile = () => {
         className='w-full'
         title='My Profile'
     >
-        <div className='w-full mt-5 px-5'>
-            <form action="" className='grid grid-cols-2 gap-5 ' onSubmit={formik.handleSubmit}>
+        <div className='w-full mt-5 px-5 pb-5'>
+            <form action="" className='grid grid-cols-1 sm:grid-cols-2 gap-5 ' onSubmit={formik.handleSubmit}>
                 <InputField 
                     id='firstname'
                     type='text'

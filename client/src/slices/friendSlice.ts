@@ -4,8 +4,6 @@ import { UserModel } from "../models/UserModel"
 import axios from 'axios'
 import { USERSROUTE } from '../http'
 import { queryString } from '../customFunctions/queryString'
-import { deleteFriendFromCurrentUser } from './currentUserSlice'
-import { deleteFriendFromUsers } from './usersSlice'
 
 
 const initialState: Slice<UserModel> = {
@@ -27,18 +25,7 @@ export const getFriends = createAsyncThunk(
     }
 ) 
 
-export const deleteUserFromFriends = createAsyncThunk(
-    'friends/deleteUserFromFriends',
-    async ({friendId, currentUserId}: {friendId: string, currentUserId: string}, {dispatch}) => {
-        console.log(friendId, currentUserId);
-        
-        const {data} = await axios.put<{user: UserModel}>(`${USERSROUTE}friends/delete/${friendId}/${currentUserId}`)
-        dispatch(deleteFriendFromCurrentUser({friendId: data.user._id}))
-        dispatch(deleteFriendFromUsers({friendId, userId: currentUserId}))
-        dispatch(deleteFriendFromUsers({friendId: currentUserId, userId: friendId}))
-        return data
-    }
-)
+
 
 
 
@@ -48,6 +35,9 @@ export const friendSlice = createSlice({
     reducers: {
         addUserToFriends: (state, action: PayloadAction<{user: UserModel}>) => {
             state.container.push(action.payload.user)
+        },
+        deleteFromFriends: (state, action: PayloadAction<{userId: string }>) => {
+            state.container = state.container.filter(user => user._id !== action.payload.userId)
         }
     },
     extraReducers: (builder) => {
@@ -55,16 +45,9 @@ export const friendSlice = createSlice({
             .addCase(getFriends.fulfilled, (state, action) => {
                 state.container = action.payload.friends
             })
-            .addCase(deleteUserFromFriends.pending, (state, action) => {
-                state.isLoading = true
-            })
-            .addCase(deleteUserFromFriends.fulfilled, (state, action) => {
-                state.container = state.container.filter(user => user._id !== action.payload.user._id) 
-                state.isLoading = false
-            })
     }
 }) 
 
 export default friendSlice.reducer
 
-export const {addUserToFriends} = friendSlice.actions
+export const {addUserToFriends, deleteFromFriends} = friendSlice.actions

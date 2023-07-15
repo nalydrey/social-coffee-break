@@ -3,14 +3,19 @@ import Message from '../models/message.js'
 
 export const createMessage = async (data, socket) => {
     console.log('createMessage')
+    console.log('socket user', socket.user);
     try {
-       console.log(data);
-    const {createdId, user, chat, text} = data
-    const newMessage = new Message({createdId, user, chat, text})
-    await newMessage.save()
-    //Add message to chat
-    const message = await Message.findById(newMessage._id).populate('user', 'private.avatar')
-    io.to(chat).emit('messageIsCreated', message) 
+    console.log(data);
+    const user = socket.user
+    if (user) {
+        const {createdId, chat, text} = data
+        const newMessage = new Message({createdId, user, chat, text})
+        await newMessage.save()
+        console.log('user ', user);
+        //Add message to chat
+        const message = await Message.findById(newMessage._id).populate('user', 'private.avatar')
+        io.to(chat).emit('messageIsCreated', message) 
+    }
     } catch (error) {
         console.log('createMessage error', error);
     }

@@ -1,4 +1,4 @@
-import {useEffect} from 'react'
+import {useEffect, useRef} from 'react'
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useAppDispatch, useAppSelector } from '../../hooks/hooks';
 import {  Chat, activateChat, decreaseCounter, deleteChat, disactivateChat, getMyChats } from '../../slices/chatSlice';
@@ -57,6 +57,8 @@ export const Chats = () => {
             }
         }
     })
+
+    const liRef = useRef<HTMLLIElement>(null)
     const {state} = useLocation()
     const navigate = useNavigate()
     const dispatch = useAppDispatch()
@@ -68,9 +70,13 @@ export const Chats = () => {
     })
     const chats: ChatModel[] = useAppSelector(state => state.chats.container)
 
-    
+    useEffect(()=>{
+        liRef.current?.scrollIntoView({behavior: 'smooth'})
+    }, [messages])
 
     useEffect(()=>{
+        liRef.current?.scrollIntoView()
+
         !currentUser &&  navigate('/users')
         return () => {
             dispatch(disactivateChat())
@@ -164,6 +170,7 @@ export const Chats = () => {
                             }
                             )
                         }
+                        <li ref={liRef}></li>
                     </ul>
                 </MappingBox>
                 <form   className={`flex gap-2 px-3 py-1 bg-sky-200 rounded-b-lg duration-500 ${!currentChat ? 'translate-y-full' : 'translate-y-0'} `}

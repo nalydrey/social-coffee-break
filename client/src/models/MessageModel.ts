@@ -1,6 +1,6 @@
 import { UserModel } from "./UserModel"
 
-export interface Message{
+export interface MessageModel{
   readonly _id: string
   readonly createdId: string
   readonly user: UserModel | string

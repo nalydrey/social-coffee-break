@@ -4,6 +4,7 @@ import { URL } from '../../http'
 import { PhotoIcon,  UsersIcon} from '@heroicons/react/24/solid'
 import { Score } from '../UI/Score'
 import { ImageWithPreloader } from '../UI/ImageWithPreloader'
+import { Avatar } from '../UI/Avatar'
 
 interface UserCardProps {
     id: string
@@ -33,19 +34,19 @@ export const UserCard = ({
 
 
   return (
-    <li className='max-w-[250px] rounded-lg shadow-light flex flex-col grow'>
+    <li className='max-w-[250px] w-full rounded-lg shadow-light flex flex-col grow'>
         <div className='relative rounded-t-lg h-[110px] bg-green-300 bg-center bg-cover bg-no-repeat'
             //  style={{backgroundImage: `url(${picture ?  URL+'/'+ picture : ''})`}}   
         >
             <ImageWithPreloader className='img absolute rounded-t-lg' src={picture ? URL+picture : ''} alt="foto"/>
-
-            <div className='border-4 border-slate-200 shadow-light absolute bottom-0 left-1/2 -translate-x-1/2 translate-y-1/2  overflow-hidden rounded-full w-32 h-32'>
-                {/* <img className='img' src={avatar ? URL+'/'+avatar : defaultFoto} alt="foto" /> */}
-                <ImageWithPreloader className='img' src={avatar ? URL+'/'+avatar : defaultFoto} alt="foto"/>
-            </div>
+            <Avatar
+                className='border-4 border-slate-200 shadow-light absolute bottom-0 left-1/2 -translate-x-1/2 translate-y-1/2'
+                classSize='w-32 h-32'
+                src = {avatar && URL+'/'+avatar}
+            />
            { 
             isOnline &&
-            <div className='w-5 h-5 rounded-full bg-green-600 absolute top-0 -translate-x-1/4 -translate-y-1/4 shadow-light'/>
+            <div className='border w-5 h-5 rounded-full bg-green-600 absolute top-0 -translate-x-1/4 -translate-y-1/4 shadow-light'/>
             }
 
         </div>

@@ -1,10 +1,10 @@
-import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
+import { PayloadAction, createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import { Slice } from "../models/Slice";
 import { UserModel } from "../models/UserModel";
 import axios from "axios";
 import { USERSROUTE } from "../http";
-import { addSuggestationToCurrentUser, deleteSuggestationFromCurrentUser } from "./currentUserSlice";
 import { queryString } from "../customFunctions/queryString";
+import { socket } from "../App";
 
 
 const initialState: Slice<UserModel> = {
@@ -13,7 +13,7 @@ const initialState: Slice<UserModel> = {
 }
 
 export const getSuggestations = createAsyncThunk(
-    'invitations/getSuggestations',
+    'suggestations/getSuggestations',
     async (suggestations: string[]) => {
         // console.log('getInvitations');
         if(suggestations.length){
@@ -25,52 +25,20 @@ export const getSuggestations = createAsyncThunk(
     }
 )
 
-export const suggestToBeFriends = createAsyncThunk(
-    'suggestations/suggestToBeFriends',
-    async({friendId, currentUserId}:{friendId: string, currentUserId: string}, {dispatch}) => {
-        console.log('friendId',friendId);
-        console.log('currentUserId',currentUserId);
-        const {data} = await axios.put<{user: UserModel}>(`${USERSROUTE}/friends/add/${friendId}/${currentUserId}`)
-        console.log(data);
-        dispatch(addSuggestationToCurrentUser({friendId}))
-        return data
-    }
-)
-
-export const cancelSuggestationToBeFriends = createAsyncThunk(
-    "suggestations/cancelSuggestationToBeFriends",
-    async({friendId, currentUserId}:{friendId: string, currentUserId: string}, {dispatch}) => {
-        console.log('friendId',friendId);
-        console.log('currentUserId',currentUserId);
-        const {data} = await axios.put<{user: UserModel}>(`${USERSROUTE}/friends/cancel/${friendId}/${currentUserId}`)
-        console.log(data);
-        dispatch(deleteSuggestationFromCurrentUser({friendId}))
-        return data
-        }
-  )
-
-
 
 export const suggestationSlice = createSlice({
     name: 'suggestations',
     initialState,
-    reducers: {},
+    reducers: {
+        addMyRequest: (state, action: PayloadAction<UserModel>) => {
+            state.container.push(action.payload)
+        },
+        deleteMyRequest: (state, action: PayloadAction<{userId: string}>) => {
+            state.container = state.container.filter(user => user._id !== action.payload.userId)
+        }
+    },
     extraReducers: (builder) => {
         builder
-            .addCase(suggestToBeFriends.pending, (state, action) => {
-                state.isLoading = true
-            })
-            .addCase(suggestToBeFriends.fulfilled, (state, action) => {
-                state.container.push(action.payload.user)
-                state.isLoading = false
-            })
-            .addCase(cancelSuggestationToBeFriends.pending, (state, action) => {
-                state.isLoading = true
-            })
-            .addCase(cancelSuggestationToBeFriends.fulfilled, (state, action) => {
-                state.container = state.container.filter(user => user._id !== action.payload.user._id )
-                state.isLoading = false
-            })
             .addCase(getSuggestations.fulfilled, (state, action) => {
                 state.container = action.payload.users
             })
@@ -79,4 +47,4 @@ export const suggestationSlice = createSlice({
 
 export default suggestationSlice.reducer
 
-export const {} = suggestationSlice.actions
+export const {addMyRequest, deleteMyRequest} = suggestationSlice.actions

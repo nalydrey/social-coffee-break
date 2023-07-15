@@ -4,7 +4,6 @@ import { UserModel } from '../../models/UserModel'
 import { getUsers } from '../../slices/usersSlice'
 import { matchedValueInArr } from '../../customFunctions/isCoincidenceInArr'
 import { useNavigate } from 'react-router-dom'
-import { Nav } from './Users'
 
 export const Friends = () => {
 
@@ -23,7 +22,7 @@ export const Friends = () => {
 
 
   const goToChat: (userId: string) => void = (userId) => {
-    const state: Nav = {
+    const state = {
         isCreateNewChat: false,
         activeChat: '',
         userId

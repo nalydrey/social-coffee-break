@@ -8,8 +8,9 @@ interface RoundButton {
     icon: ReactNode
     disabled?: boolean
     className?: string
+    classWrap?: string
     isLoading?: boolean
-    title: string
+    title?: string
     onClick?: (e:MouseEvent)=>void
 }
 
@@ -21,6 +22,7 @@ export const RoundButton = ({
     type,
     title,
     className='bg-blue-400',
+    classWrap,
     onClick = () =>{}
 }:RoundButton) => {
 
@@ -28,7 +30,7 @@ export const RoundButton = ({
     const [isActive, setActive] = useState(false)
 
   return (
-    <div className='relative group'>
+    <div className={`relative group ${classWrap}`}>
         <button className={`${className}  rounded-full w-${d} h-${d} flex justify-center items-center shadow-light duration-200 active:scale-90`}
             type = {type}
             disabled = {disabled}

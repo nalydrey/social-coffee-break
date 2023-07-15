@@ -201,101 +201,16 @@ export const changePicture = async (req, res) => {
 };
 
 
-//////////////////////////////////////////////////////////////////////////////////////////////////////
-
-export const addToFriends = async (req, res) => {
-    try {
-        console.log('addToFriends');
-        console.log(req.params);
-        const {friendId, userId} = req.params
-        //Add friend to currentUser
-        await User.findByIdAndUpdate(userId, {$push: {myRequests: friendId}})
-        //Add currentUser to Friend
-        const user = await User.findByIdAndUpdate(friendId, {$push: {invitations: userId}}, {new: 1})
-
-        res.json({user})
-       
-    } catch (error) {
-        console.log('addToFriends error', error);
-        res.json({isAdd: false})
-    }
-};
-
-export const deleteFromFriends = async (req, res) => {
-    try {
-        console.log('deleteFromFriends');
-        console.log(req.params);
-        const {friendId, userId} = req.params
-        //delete friend from currentUser
-        await User.findByIdAndUpdate(userId, {$pull: {friends: friendId}})
-        //delete currentUser to Friend
-        const user = await User.findByIdAndUpdate(friendId, {$pull: {friends: userId}}, {new: 1})
-
-        res.json({user})
-       
-    } catch (error) {
-        console.log('deleteFromFriends error', error);
-        res.json({isAdd: false})
-    }
-};
-
-export const cancelAdditionFriends = async (req, res) => {
-    try {
-        console.log('addToFriends');
-        console.log(req.params);
-        const {friendId, userId} = req.params
-        //Add friend to currentUser
-        await User.findByIdAndUpdate(userId, {$pull: {myRequests: friendId}})
-        //Add currentUser to Friend
-        const user = await User.findByIdAndUpdate(friendId, {$pull: {invitations: userId}})
-
-        res.json({user})
-       
-    } catch (error) {
-        console.log('addToFriends error', error);
-        res.json({isCancel: false})
-    }
-};
 
 
 
-export const acceptInvitation = async (req, res) => {
-    try {
-        console.log('acceptInvitation');
-        console.log(req.params);
-        const {friendId, userId} = req.params
-        //Add friend to currentUser to friends and delete invitation 
-        await User.findByIdAndUpdate(userId, {$pull: {invitations: friendId}, $push: {friends: friendId}})
-        //Delete request from Friend
-        const user = await User.findByIdAndUpdate(friendId, {$pull: {myRequests: userId}, $push: {friends: userId}}, {new:1})
-        res.json({user})
-       
-    } catch (error) {
-        console.log('acceptInvitation error', error);
-        res.json({isAdd: false})
 
-    }
-};
 
-export const rejectInvitation = async (req, res) => {
-    try {
-        console.log('rejectInvitation');
-        console.log(req.params);
-        const {friendId, userId} = req.params
-        // Delete invitation from currentUser
-        await User.findByIdAndUpdate(userId, {$pull: {invitations: friendId}})
-        //Delete request from Friend
-        const user = await User.findByIdAndUpdate(friendId, {$pull: {myRequests: userId}})
 
-        res.json({user})
 
-       
-    } catch (error) {
-        console.log('rejectInvitation error', error);
-        res.json({isDelete: false})
 
-    }
-};
+
+
 
 
 

@@ -1,32 +1,39 @@
-import React, { useEffect } from "react"
+import { useEffect } from "react"
 import { useAppSelector, useAppDispatch } from "../../hooks/hooks"
 import type { UserModel } from "../../models/UserModel"
 import { UserCard } from "../outputs/UserCard"
 import { deleteUser } from "../../slices/usersSlice"
 import { enter } from "../../slices/currentUserSlice"
-import { acceptInvitation, rejectInvitation } from "../../slices/invitationSlice"
 import { getUsers } from "../../slices/usersSlice"
 import { matchedValueInArr } from "../../customFunctions/isCoincidenceInArr"
 import { useNavigate } from "react-router-dom"
 import { MappingBox } from "../UI/MappingBox"
 import { RoundButton } from "../UI/RoundButton"
-import { AcademicCapIcon, ArrowDownTrayIcon, ChatBubbleLeftRightIcon, UserMinusIcon, UserPlusIcon, XCircleIcon } from "@heroicons/react/24/solid"
-import { cancelSuggestationToBeFriends, suggestToBeFriends } from "../../slices/suggestationSlice"
-import { deleteUserFromFriends } from "../../slices/friendSlice"
+import { ArrowDownTrayIcon, ChatBubbleLeftRightIcon, UserMinusIcon, UserPlusIcon, XCircleIcon } from "@heroicons/react/24/solid"
 import { ContentBox } from "../UI/ContentBox"
 import { UserCardSkeleton } from "../Preloaders/UserCardSkeleton"
 import { socket } from "../../App"
+import { useStateController } from "../../hooks/useStateController"
 
 
 
 export const Users = () => {
+
+    const {
+        moveToSuggestation,
+        moveToFriend,
+        removeFromFriend,
+        removeFromSuggestation,
+        removeFromInvitation,
+    } = useStateController()
+
+    const dispatch = useAppDispatch()
     const users = useAppSelector<UserModel[]>((state) => state.users.container)
     const isLoadingUsers = useAppSelector<boolean>((state) => state.users.isLoading)
-    const isLoadingSuggest = useAppSelector<boolean>((state) => state.suggestations.isLoading)
-    const isLoadingInvitations = useAppSelector<boolean>((state) => state.invitations.isLoading)
     const isLoadingFriends = useAppSelector<boolean>((state) => state.friends.isLoading)
     const currentUser = useAppSelector<UserModel | null>((state) => state.currentUser.user)
-    const dispatch = useAppDispatch()
+    const isLoadingSuggest = useAppSelector<boolean>((state) => state.suggestations.isLoading)
+    const isLoadingInvitations = useAppSelector<boolean>((state) => state.invitations.isLoading)
 
     const navigate = useNavigate()      
 
@@ -45,48 +52,23 @@ export const Users = () => {
             const userChats = users.find((user) => user._id === userId)?.chats
             if (userChats) {
                 const matchedChat = matchedValueInArr(currentUser.chats, userChats)
-                console.log('matchedChat ', matchedChat);
                 
                 if (matchedChat) {
                 //переходим в чат
-                console.log('111');
-                
-                state.isCreateNewChat = false
-                state.activeChat = matchedChat
+                    state.isCreateNewChat = false
+                    state.activeChat = matchedChat
                 } 
                 else {
                 //Создаем новый чат
-                // state.isCreateNewChat = true
-                    console.log('Ctr');
-                    
-                socket.emit('createNewChat', {userTransmitter: currentUser._id, userReceiver: userId})
-
+                    socket.emit('createNewChat', {userReceiver: userId})
                 }
                 navigate("/chats", {state})
             }
         }
     }
 
-    const handlerAddToFriends = (id:string) => {
-        if(currentUser && !currentUser.myRequests.includes(id)){
-            dispatch(suggestToBeFriends({friendId: id, currentUserId: currentUser._id}))
-        }
-    }
-
-    const handlerCancelSuggestation = (id:string) => {
-        if(currentUser && currentUser.myRequests.includes(id)){
-        dispatch(cancelSuggestationToBeFriends({friendId: id, currentUserId: currentUser._id}))
-        }
-    }
-  
-    const handlerReject = (id:string) => {
-        if(currentUser){
-        dispatch(rejectInvitation({currentUserId:currentUser._id , friendId:id }))
-        }
-    }
-    
     const handlerEnter = (id:string) => {
-        currentUser && socket.emit('quitUser',{userId: currentUser._id})
+        currentUser && socket.emit('quitUser')
         dispatch(enter(id)); 
         localStorage.setItem("currentUser", id)
     }
@@ -95,23 +77,38 @@ export const Users = () => {
         dispatch(deleteUser(id))
     }
     
-    const handlerAccept = (id:string) => {
-        if(currentUser)
-        dispatch(acceptInvitation({friendId: id, currentUserId: currentUser._id}))
-    }
-  
-    const handlerDeleteFromFriends = (id:string) => {
-        if(currentUser)
-        dispatch(deleteUserFromFriends({friendId: id, currentUserId: currentUser._id}))
-    }
-
-
-    const handlerTest = (id:string) => {
-        if(currentUser){
-            console.log(currentUser._id, id);
-            socket.emit('emiter', {userTransmitter: currentUser._id, userReceiver: id})
+    const handlerAddToFriends = (user: UserModel) => {
+        if(currentUser && !currentUser.myRequests.includes(user._id)) {
+            moveToSuggestation({user})
+            socket.emit('newInvitation', {friendId: user._id})
         }
     }
+
+    const handlerCancelSuggestation = (userId:string) => {
+        if (currentUser && currentUser.myRequests.includes(userId)) {
+            removeFromSuggestation({userId})
+            socket.emit('cancelSuggestation', {friendId: userId})
+        }
+        
+    }
+  
+    const handlerReject = (userId:string) => {
+        removeFromInvitation({userId})
+        socket.emit('rejectInvitation', {friendId:userId})
+    }
+    
+    
+    const handlerAccept = (user:UserModel) => {
+        moveToFriend({user})
+        socket.emit('acceptInvitation', {friendId: user._id})
+
+    }
+  
+    const handlerDeleteFromFriends = (userId:string) => {
+        removeFromFriend({userId})
+        socket.emit('deleteFriend', {friendId: userId})
+    }
+
 
   return (
     <ContentBox 
@@ -124,17 +121,14 @@ export const Users = () => {
             loadingComponent = {<UserCardSkeleton/>}
             alternateComponent = 'Пока нет пользователей'
         >
-            <ul className='flex  gap-5'>
+            <ul className='grid justify-center justify-items-center sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4  gap-5 '>
                 {
                     users.map(user => {
-
                         const isI = currentUser?._id === user._id 
                         const isMyRequest = (currentUser?.myRequests.includes(user._id))
                         const isMyFriend = currentUser?.friends.includes(user._id)
                         const isMyInvitation = currentUser?.invitations.includes(user._id )
-
                         const iconSizeClass = 'w-6 h-6'
-
                         return (
                             <UserCard 
                                 key={user._id}
@@ -165,7 +159,7 @@ export const Users = () => {
                                             title='Пригласить в друзья' 
                                             isLoading = {isLoadingSuggest}
                                             icon = {<UserPlusIcon className={`${iconSizeClass} text-white`}/>}
-                                            onClick={() => handlerAddToFriends(user._id)}  
+                                            onClick={() => handlerAddToFriends(user)}  
                                         />
                                     }
                                     {
@@ -184,7 +178,7 @@ export const Users = () => {
                                                 title='Принять приглашение'
                                                 isLoading={isLoadingInvitations}
                                                 icon = {<UserPlusIcon className={`${iconSizeClass} text-white`}/>}
-                                                onClick={()=>handlerAccept(user._id)}   
+                                                onClick={()=>handlerAccept(user)}   
                                             />
                                             <RoundButton 
                                                 title='Отклонить приглашение' 

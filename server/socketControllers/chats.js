@@ -15,18 +15,21 @@ export const joinToChat = ({chatId}, socket) => {
     socket.join(chatId)
 }
 
-export const createNewChat = async ({userTransmitter, userReceiver}, socket) => {
+export const createNewChat = async ({userReceiver}, socket) => {
     console.log('createChat');
+    const userTransmitter = socket.user
     try {
-        //Создать чат
-        const chat = new Chat({users: [userTransmitter, userReceiver]})
-        await chat.save()
-        const popChat = await Chat.findById(chat).populate('users', 'private.avatar private.firstName') 
-        console.log(chat);
-        popChat._doc.unreadMessageCount = 0
-        //Записать его участникам чата
-        await User.updateMany({_id: [userTransmitter, userReceiver]}, {$push: {chats: chat}})
-        io.to(userTransmitter).to(userReceiver).emit('chatIsCreated', {chat: popChat})
+        if (userTransmitter) {
+            //Создать чат
+            const chat = new Chat({users: [userTransmitter, userReceiver]})
+            await chat.save()
+            const popChat = await Chat.findById(chat).populate('users', 'private.avatar private.firstName') 
+            console.log(chat);
+            popChat._doc.unreadMessageCount = 0
+            //Записать его участникам чата
+            await User.updateMany({_id: [userTransmitter, userReceiver]}, {$push: {chats: chat}})
+            io.to(userTransmitter).to(userReceiver).emit('chatIsCreated', {chat: popChat})
+        }
     } catch (error) {
         console.log('createChat error ', error);
     }

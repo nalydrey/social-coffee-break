@@ -3,7 +3,7 @@ import React from 'react'
 interface TooltipProps {
     children: React.ReactNode
     isOpen: boolean
-    className: string
+    className?: string
 }
 
 export const Tooltip = ({

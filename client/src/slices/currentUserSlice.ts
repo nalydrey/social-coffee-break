@@ -69,6 +69,9 @@ export const currentUserSlice = createSlice({
   name: "currentUser",
   initialState,
   reducers: {
+    quit: (state) => {
+      state.user = null
+    },
     addMyChat: (state, action: PayloadAction<string>) => {
       if(state.user) 
       state.user.chats.push(action.payload)
@@ -76,6 +79,10 @@ export const currentUserSlice = createSlice({
     addSuggestationToCurrentUser: (state, action: PayloadAction<{friendId: string}>) => {
       if(state.user)
       state.user.myRequests.push(action.payload.friendId)
+    },
+    addInvitationToCurrentUser: (state, action: PayloadAction<{friendId: string}>) => {
+      if(state.user)
+      state.user.invitations.push(action.payload.friendId)
     },
     deleteSuggestationFromCurrentUser: (state, action: PayloadAction<{friendId: string}>) => {
       if(state.user)
@@ -134,10 +141,12 @@ export const {
   addMyChat, 
   addFriendToCurrentUser, 
   addSuggestationToCurrentUser, 
+  addInvitationToCurrentUser,
   deleteFriendFromCurrentUser,
   deleteInvitationFromCurrentUser,
   deleteSuggestationFromCurrentUser,
-  deleteChatFromCurrentUser
+  deleteChatFromCurrentUser,
+  quit
  } = currentUserSlice.actions
 
 export default currentUserSlice.reducer

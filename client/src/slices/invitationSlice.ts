@@ -1,4 +1,4 @@
-import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
+import { PayloadAction, createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import { Slice } from "../models/Slice";
 import { UserModel } from "../models/UserModel";
 import axios from "axios";
@@ -63,7 +63,16 @@ export const rejectInvitation = createAsyncThunk(
 export const invitationSlice = createSlice({
     name: 'invitations',
     initialState,
-    reducers: {},
+    reducers: {
+        addToInvitation: (state, action: PayloadAction<UserModel>) => {
+            state.container.push(action.payload)
+        },
+        deleteFromInvitation: (state, action: PayloadAction<{userId: string}>) => {
+            console.log(action.payload);
+            
+            state.container = state.container.filter(user => user._id !== action.payload.userId)
+        }
+    },
     extraReducers: (builder) => {
         builder
             .addCase(getInvitations.fulfilled, (state, action) => {
@@ -85,5 +94,7 @@ export const invitationSlice = createSlice({
             })
     }
 })
+
+export const {addToInvitation, deleteFromInvitation} = invitationSlice.actions
 
 export default invitationSlice.reducer

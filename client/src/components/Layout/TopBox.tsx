@@ -7,59 +7,60 @@ import { ButtonUnderline } from '../UI/ButtonUnderline'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { ImageWithPreloader } from '../UI/ImageWithPreloader'
 import { DotsPreloader } from '../Preloaders/DotsPreloader'
+import { Avatar } from '../UI/Avatar'
+import { useAppSelector } from '../../hooks/hooks'
+import { UserModel } from '../../models/UserModel'
 
 interface TopBoxProps {
     onChangeAvatar: (e: ChangeEvent<HTMLInputElement>)=>void
     onChangePicture: (e: ChangeEvent<HTMLInputElement>)=>void
-    avatar: string
-    picture: string
-    firstName: string
-    lastName: string
     messageCounter: number
-    isLoadingAvatar?: boolean
-    isLoadingPicture?: boolean
 }
 
 
 export const TopBox = ({
     onChangeAvatar=()=>{},
     onChangePicture=()=>{},
-    isLoadingAvatar,
-    isLoadingPicture,
-    picture,
-    avatar,
-    firstName,
-    lastName,
     messageCounter,
 }:TopBoxProps) => {
 
+    const host = URL + '/'
+
+    const currentUser = useAppSelector<UserModel | null>(state => state.currentUser.user)
+
+    const {isLoadingAvatar, isLoadingPicture} = useAppSelector<
+  {
+    isLoadingAvatar: boolean
+    isLoadingPicture: boolean
+  }>(state => state.currentUser.loadings)
+
+    const avatar = currentUser && currentUser.private.avatar ? host + currentUser.private.avatar : ''
+    const picture = currentUser && currentUser.picture ? host + currentUser.picture : ''
+    const firstName = currentUser ? currentUser.private.firstName : ''
+    const lastName = currentUser ? currentUser.private.lastName : ''
+
     const navigate = useNavigate()
     const location = useLocation()
-    // const style = {
-    //     backgroundImage: `url(${picture ? URL+'/'+picture : ''})`,
-    // }
-    
-    // const isActive = true
-
-    // console.log(location);
+ 
     
 
   return (
-    <div className='box my-10 overflow-hidden'>
+    <div className='box mb-4 mx-1 overflow-hidden'>
 
-        <div className='relative pt-[20%] bg-indigo-400 w-full bg-cover bg-center bg-no-repeat'
+        <div className='relative pt-[30%] sm:pt-[20%] bg-indigo-400 w-full bg-cover bg-center bg-no-repeat'
             //  style={style}   
         >
             <ImageWithPreloader 
                 className=' absolute top-0' 
-                src={`${picture ? URL+'/'+picture : ''}`} 
+                src={picture} 
                 alt='picture'
             />
+            
             {   isLoadingPicture &&
                     <DotsPreloader className='absolute top-0'/>
             }
-            <div className='absolute bottom-0 right-0 px-5 translate-y-1/2 z-10 flex gap-3'>
-                <label htmlFor="avatar" className=' bg-orange-500 block p-2 rounded-full cursor-pointer duration-300 hover:scale-125'>
+            <div className='absolute bottom-0 right-0 px-5 translate-y-0 sm:translate-y-1/2 z-10 flex gap-3'>
+                <label htmlFor="avatar" className=' bg-orange-500 flex p-1 w-8 h-8 sm:w-10 sm:h-10 items-center justify-center rounded-full cursor-pointer duration-300 hover:scale-125'>
                     <CameraIcon className="h-7 w-7 text-blue-800 cursor-pointer" />
                     <input  className='hidden' 
                             type='file' 
@@ -68,7 +69,7 @@ export const TopBox = ({
                             onChange={onChangeAvatar}
                     />
                 </label>
-                <label htmlFor="picture" className=' bg-green-500 block p-2 rounded-full cursor-pointer duration-300 hover:scale-125'>
+                <label htmlFor="picture" className=' bg-green-500 p-1 w-8 h-8 sm:w-10 sm:h-10 flex items-center justify-center rounded-full cursor-pointer duration-300 hover:scale-125'>
                     <PhotoIcon className="h-7 w-7 text-orange-800 cursor-pointer" />
                     <input  className='hidden' 
                             type='file' 
@@ -81,35 +82,25 @@ export const TopBox = ({
         </div>
 
         <div className='min-h-[50px] relative bg-slate-300 flex flex-col justify-end'>
-            <div className='absolute -translate-y-3/4 top-0 left-10'>
-                <div className='flex items-end text-white'>
-                    <div className="relative border-8 border-slate-300 overflow-hidden w-[170px] h-[170px] rounded-[50%] shadow-light">
-                        <ImageWithPreloader
-                             className=' object-cover w-full h-full' 
-                             src={avatar ? URL + '/' + avatar : defaultFoto} 
-                             alt="avatar" 
-                        />
-                        {   isLoadingAvatar &&
-                            <DotsPreloader className='absolute top-0'/>
-                        }
-                    </div>
-                    <div className='flex text-3xl font-bold text-sky-700 gap-2'>
-                        <span>{firstName}</span>
-                        <span>{lastName}</span>
+            <div className='absolute -translate-y-3/4 top-0 left-2 sm:left-5'>
+                <div className='flex flex-col sm:flex-row items-start sm:items-end text-white'>
+                    <Avatar
+                        className="relative border-4 lg:border-8 border-slate-300 shadow-light"
+                        classSize="w-20 h-20 us:w-28 us:h-28 sm:w-32 sm:h-32 md:w-36 md:h-36 lg:w-40 lg:h-40"
+                        isProgress = {isLoadingAvatar}
+                        src={avatar}
+                    />
+                    <div className='flex text-xl sm:text-2xl md:text-3xl font-bold text-sky-700 gap-2'>
+                        <span>{firstName} {lastName}</span>
                     </div>
                 </div>
             </div>
             <div className=' grow h-12'></div>    
             <div className=' flex justify-center gap-5'>
                 <ButtonUnderline
-                    title='Profile data'
-                    isActive={location.pathname === '/profile'}
-                    onClick={()=>{navigate('/')}}
-                />
-                <ButtonUnderline
                     title='People'
-                    isActive={location.pathname === '/users'}
-                    onClick={()=>{navigate('users')}}
+                    isActive={location.pathname === '/user'}
+                    onClick={()=>{navigate('/user')}}
                 />
                 <ButtonUnderline
                     title='My Posts'

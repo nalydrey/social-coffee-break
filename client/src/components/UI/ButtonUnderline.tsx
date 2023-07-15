@@ -1,7 +1,7 @@
 import React, { MouseEvent } from 'react'
 
 interface ButtonUnderlineProps {
-    isActive: boolean
+    isActive?: boolean
     title: string
     label?: number
     onClick: (e: MouseEvent )=>void
