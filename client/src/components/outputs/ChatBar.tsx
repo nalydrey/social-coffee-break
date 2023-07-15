@@ -1,42 +1,70 @@
-import {useState} from 'react'
+import {useState, useEffect} from 'react'
 import { RoundButton } from '../UI/RoundButton'
-import { BellIcon, PaperAirplaneIcon } from '@heroicons/react/24/solid'
+import { BellIcon} from '@heroicons/react/24/solid'
 import { ChatItem } from './ChatItem'
-import { useAppSelector } from '../../hooks/hooks'
+import { useAppDispatch, useAppSelector } from '../../hooks/hooks'
 import { ChatModel } from '../../models/ChatModel'
 import { ContentBox } from '../UI/ContentBox'
-import { Avatar } from '../UI/Avatar'
 import { URL } from '../../http'
-import moment from 'moment'
 import { MessageModel} from '../../models/MessageModel'
-import { Message } from './Message'
 import { UserModel } from '../../models/UserModel'
+import { socket } from '../../App'
+import { Chat, decreaseCounter, activateChat } from '../../slices/chatSlice'
+import { createTempMessage, getMessages } from '../../slices/messagesSlice'
+import { ChatHeader } from '../Layout/chat/ChatHeader'
+import { nanoid } from '@reduxjs/toolkit'
+import { ChatForm } from '../Layout/chat/ChatForm'
+import { ChatContent } from '../Layout/chat/ChatContent'
 
-interface ChatBarProps {
-    messageCounter: number
-    isOnline: boolean
-    chatName: string
-    src: string
-}
 
-export const ChatBar = ({
-    messageCounter,
-    isOnline,
-    chatName,
-    src
-}: ChatBarProps) => {
 
+
+export const ChatBar = () => {
+
+    const dispatch = useAppDispatch()
+
+    const {messageCounter} = useAppSelector<Chat>(state => state.chats)
     const chats = useAppSelector<ChatModel[]>(state => state.chats.container)
+    const activeChat = chats.find(chat => chat.isActive)
     const messages = useAppSelector<MessageModel[]>(state => state.messages.container)
+    const messagesLoading = useAppSelector<boolean>(state => state.messages.isLoading)
     const currentUser = useAppSelector<UserModel>(state => state.currentUser.user)
 
-    const [isOpen, setIsOpen] = useState<boolean>(true)
+    const [isOpen, setIsOpen] = useState<boolean>(false)
     const [isOpenChat, setIsOpenChat] = useState<boolean>(true)
 
+    useEffect (()=>{
+        if(activeChat){
+            setIsOpen(true)
+        }
+    },[activeChat])
+  
+    useEffect (()=>{
+        if(activeChat){
+            dispatch(getMessages({chat: activeChat._id}))
+        }
+    },[activeChat?._id])
 
 
-    const handleOpenChat = () => {
-        setIsOpenChat(!isOpenChat)
+
+    const handlerOnVisible = (messageId: string, messageUser: string, isRead: boolean, chatId: string) => {
+        if(currentUser && currentUser._id !== messageUser && !isRead){
+            socket.emit('readMessage', {messageId, chatId})
+            dispatch(decreaseCounter({chatId}))
+        }
+    }
+
+    const handlerDeleteMessage = (messageId: string, chatId: string) => {
+        socket.emit('deleteMessage', {messageId, chatId})
+     }
+
+    const handlerOnDeleteChat = (chatId: string) => {
+        socket.emit('deleteChat', {chatId})
+    }
+
+    const handleOpenChat = (chatId: string) => {
+        dispatch(activateChat(chatId))
+        dispatch(getMessages({chat: chatId}))
     }
 
     const handleOpen = () => {
@@ -44,63 +72,77 @@ export const ChatBar = ({
         if(!isOpenChat) setIsOpenChat(!isOpenChat)
     }
 
+    const handleSubmit = (text: string) => {
+        if(currentUser && activeChat){
+            const createdId = nanoid()
+            const date = new Date().toISOString()
+            
+            dispatch(createTempMessage({
+                _id: 'temp', 
+                createdId,
+                user: currentUser,
+                chat: activeChat._id,
+                isRead: false,
+                text,
+                createdAt: date,
+                updatedAt: date,
+            }))
+
+            socket.emit('sendMessage', {
+                createdId,
+                user: currentUser._id, 
+                chat: activeChat._id, 
+                text
+            })
+            
+        }
+    }
+
+    const activeChatUser = activeChat && activeChat.users[0]
+    // console.log('isOpen', isOpen);
+    // console.log('activeChat', activeChat);
+    
+    // console.log(isOpen || !!activeChat);
+    
+
   return (
     <div className='absolute bottom-2 top-2 right-2  flex flex-col items-end gap-3 z-20'>
         <div className={`relative grow bg-red-300 w-0 `}>
-            <div className={`absolute top-0 right-20  duration-300  ${isOpenChat ? 'scale-0': 'scale-1'}`}>
-                <ContentBox 
-                    title='Chat'
-                    className='min-w-[400px]'
-                >
-                    <div className='flex py-1 px-5 items-center border-b-4 border-sky-800'>
-                        <div className='relative mb-1'>
-                            <Avatar 
-                                src={src ? URL+src : ''}
-                                className='shadow-light'
-                            />
-                            {
-                                isOnline &&    
-                                <div className='absolute bottom-0 left-0 -translate-x-1/4 translate-y-1/4 w-3 h-3 rounded-full bg-green-600'/>
-                            }
-                        </div>
-                        <p className='grow text-center text-2xl font-bold text-sky-700'>
-                            {chatName}
-                        </p>
-                    </div>
-                    <ul className='py-2 px-3 flex flex-col gap-3 max-h-[500px] overflow-auto'>
-                        {messages.map(message => {
-                            const user = message.user as UserModel
-                            const {text, isRead, createdAt} = message
-                            return (
-                                <Message
-                                    src={user.private.avatar ? URL + user.private.avatar : ''}
-                                    isMyMessage = {user._id === currentUser._id}
-                                    isRead = {isRead}
-                                    time = {moment(createdAt).format('D MMM HH:mm')}
-                                    text = {text}
-                                />
-                            )
-                        }
-                        )}
-                    </ul>
-                    <div className='flex gap-2 p-2 border-t-4 border-sky-700' >
-                        <textarea className=' w-full border-2 border-sky-500 p-3 rounded-lg focus:border-4 focus:outline-none' />
-                        <RoundButton
-                            title='Send'
-                            d={10}
-                            classWrap='self-end'
-                            // disabled={!currentChat}
-                            icon = {<PaperAirplaneIcon className='w-6 h-6 text-slate-300'/>}
-                            type='submit' 
+            {
+                activeChatUser && 
+                <div className={`absolute top-0 right-20  duration-300  ${isOpen ? 'scale-1': 'scale-0'}`}>
+                    <ContentBox 
+                        title='Chat'
+                        className='min-w-[400px]'
+                    >
+                       <ChatHeader
+                            chatName={activeChatUser.private.firstName + ' ' + activeChatUser.private.lastName}
+                            isOnline = {activeChatUser.isOnline}
+                            avatar = {activeChatUser.private.avatar ? URL + activeChatUser.private.avatar : ''}
+                       />
+                       
+                       <ChatContent
+                            isLoading = {messagesLoading}
+                            currentUserId={currentUser._id}
+                            content={messages}
+                            onVisible={handlerOnVisible}
+                            onDelete={handlerDeleteMessage}
+                            onEdit={()=>{}}
+                       />
+                        
+                        <ChatForm
+                            onSubmit = {handleSubmit}
                         />
-                    </div>
-                </ContentBox>
-            </div>
-            <ul className={`flex flex-col gap-3 duration-300 absolute right-0 bg-orange-200 rounded-xl p-2 ${isOpen ? 'scale-0' : 'scale-1'}`}>
+                    </ContentBox>
+                </div>
+            }
+            <ul className={`flex flex-col gap-3 duration-300 absolute right-0 bg-orange-200 rounded-xl p-2 ${isOpen? 'scale-1' : 'scale-0'}`}>
                 {chats.map(chat => (
                     <ChatItem 
+                        key ={chat._id}
+                        chatId={chat._id}
                         src={chat.users[0].private.avatar}
-                        isOnline ={true}
+                        isOnline ={chat.users[0].isOnline}
                         counter={chat.unreadMessageCount}
                         onClick={handleOpenChat}
                     />

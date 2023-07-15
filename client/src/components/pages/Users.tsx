@@ -14,6 +14,7 @@ import { ContentBox } from "../UI/ContentBox"
 import { UserCardSkeleton } from "../Preloaders/UserCardSkeleton"
 import { socket } from "../../App"
 import { useStateController } from "../../hooks/useStateController"
+import { activateChat } from "../../slices/chatSlice"
 
 
 
@@ -54,15 +55,11 @@ export const Users = () => {
                 const matchedChat = matchedValueInArr(currentUser.chats, userChats)
                 
                 if (matchedChat) {
-                //переходим в чат
-                    state.isCreateNewChat = false
-                    state.activeChat = matchedChat
+                    dispatch(activateChat(matchedChat))
                 } 
                 else {
-                //Создаем новый чат
                     socket.emit('createNewChat', {userReceiver: userId})
                 }
-                navigate("/chats", {state})
             }
         }
     }

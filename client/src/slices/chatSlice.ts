@@ -1,6 +1,6 @@
 import { createAsyncThunk, createSlice, PayloadAction } from "@reduxjs/toolkit"
 import type { ChatModel } from "../models/ChatModel"
-import type { Message } from "../models/MessageModel"
+import type { MessageModel } from "../models/MessageModel"
 import type { Slice } from "../models/Slice"
 import { CHATSROUTE } from "../http"
 import axios from "axios"
@@ -89,10 +89,26 @@ export const chatSlice = createSlice({
           : (chat.isActive = false)
       })
     },
+
+    chatUserConnect: (state, action: PayloadAction<{user: string}>) => {
+      const chat = state.container.find(chat => chat.users[0]._id === action.payload.user)
+      if(chat){
+        chat.users[0].isOnline = true
+      }
+    },
+    
+    chatUserDisconnect: (state, action: PayloadAction<{user: string}>) => {
+      const chat = state.container.find(chat => chat.users[0]._id === action.payload.user)
+      if(chat){
+        chat.users[0].isOnline = false
+      }
+    },
+
+
     disactivateChat: (state) => {
       state.container.forEach(chat => chat.isActive = false)
     },
-    addMessageToChat: (state, action: PayloadAction<{chat: ChatModel['_id'], message: Message['_id']}>) => {
+    addMessageToChat: (state, action: PayloadAction<{chat: ChatModel['_id'], message: MessageModel['_id']}>) => {
       state.container.forEach(chat => {
         chat._id === action.payload.chat && chat.messages.push(action.payload.message)
       })
@@ -128,4 +144,4 @@ export const chatSlice = createSlice({
 
 export default chatSlice.reducer
 
-export const { activateChat, addMessageToChat, disactivateChat, decreaseCounter, increaseCounter } = chatSlice.actions
+export const { activateChat, addMessageToChat, disactivateChat, decreaseCounter, increaseCounter, chatUserConnect, chatUserDisconnect } = chatSlice.actions

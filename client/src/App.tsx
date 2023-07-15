@@ -1,6 +1,5 @@
 import { useEffect} from 'react'
 import { Users } from "./components/pages/Users"
-import { Chats } from "./components/pages/Chats"
 import { UserModel } from './models/UserModel'
 import { enter} from './slices/currentUserSlice'
 import { Route, Routes, useNavigate } from "react-router-dom"
@@ -65,10 +64,6 @@ function App() {
   },[currentUserId])
 
 
- 
-
-
-
   return (
     <>
       <Routes>
@@ -77,7 +72,6 @@ function App() {
           <Route path='user' element = {<MainUser/>}>
             <Route index element={<Users/>}/>
             <Route path='profile' element={<Profile />}/>
-            <Route path="chats" element={<Chats />} />
             <Route path="myposts" element={<MyPosts />} />
             <Route path="posts" element={<Posts />} />
           </Route>

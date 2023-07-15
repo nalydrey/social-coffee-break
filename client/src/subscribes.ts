@@ -1,15 +1,11 @@
 import { socket } from "./App"
-import { addCreatedChat, decreaseCounter, deleteChat } from "./slices/chatSlice"
+import { addCreatedChat, chatUserConnect, chatUserDisconnect, deleteChat } from "./slices/chatSlice"
 import { createMessage, deleteMessage, readMessage } from "./slices/messagesSlice"
-import { connectUser, deleteFriendFromUsers, disconnectUser } from "./slices/usersSlice"
+import { connectUser, disconnectUser } from "./slices/usersSlice"
 import type { AppDispatch } from "./store/store"
-import type { Message } from "./models/MessageModel"
+import type { MessageModel } from "./models/MessageModel"
 import type { UserModel } from "./models/UserModel"
-import { addToInvitation, deleteFromInvitation } from "./slices/invitationSlice"
-import { addFriendToCurrentUser, addInvitationToCurrentUser, deleteFriendFromCurrentUser, deleteInvitationFromCurrentUser, deleteSuggestationFromCurrentUser } from "./slices/currentUserSlice"
-import { deleteMyRequest } from "./slices/suggestationSlice"
-import { addUserToFriends, deleteFromFriends } from "./slices/friendSlice"
-import { StateController, StateControllerReturn, useStateController } from "./hooks/useStateController"
+import { StateControllerReturn } from "./hooks/useStateController"
 
 type SubscribesFunc = (dispatch: AppDispatch, currentUser: UserModel, controller: StateControllerReturn ) => void 
 
@@ -29,11 +25,14 @@ export const subscribes: SubscribesFunc = (dispatch, currentUser, controller) =>
 
     socket.on('userConnected', (data) => {
         dispatch(connectUser({userId: data.user }))
+        dispatch(chatUserConnect({user: data.user}))
+
     })
     socket.on('userDisconnected', (data) => {
         dispatch(disconnectUser({userId: data.user}))
+        dispatch(chatUserDisconnect({user: data.user}))
     })
-    socket.on('messageIsCreated', (data: Message) => {
+    socket.on('messageIsCreated', (data: MessageModel) => {
         dispatch(createMessage(data))
     })
     socket.on('chatIsCreated', (data) => {
@@ -42,7 +41,7 @@ export const subscribes: SubscribesFunc = (dispatch, currentUser, controller) =>
     socket.on('messageIsRead', (data) => {
         dispatch(readMessage({messageId: data}))
     })
-    socket.on('messageIsDeleted', (message: Message)=>{
+    socket.on('messageIsDeleted', (message: MessageModel)=>{
         dispatch(deleteMessage({message, currentUserId: currentUser._id}))
     })
     socket.on('chatIsDeleted', (chatId: string)=>{

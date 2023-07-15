@@ -6,10 +6,12 @@ interface ChatItemProps {
     src: string
     isOnline: boolean
     counter: number
-    onClick: ()=>void
+    onClick: (id: string)=>void
+    chatId: string
 }
 
 export const ChatItem = ({
+    chatId,
     src,
     isOnline,
     counter,
@@ -18,7 +20,7 @@ export const ChatItem = ({
   return (
     <div 
         className='relative mt-3'
-        onClick={onClick}
+        onClick={() => onClick(chatId)}
     >
         <Avatar
             src = {src ? URL+src : '' }

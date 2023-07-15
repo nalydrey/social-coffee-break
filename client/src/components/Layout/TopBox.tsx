@@ -112,12 +112,6 @@ export const TopBox = ({
                     isActive={location.pathname === '/posts'}
                     onClick={()=>{navigate('posts')}}
                 />
-                <ButtonUnderline
-                    title='Chats'
-                    label={messageCounter}
-                    isActive={location.pathname === '/chats'}
-                    onClick={()=>{navigate('chats')}}
-                />
             </div>    
         </div>
     </div>

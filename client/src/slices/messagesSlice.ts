@@ -1,5 +1,5 @@
 import { PayloadAction, createAsyncThunk, createSlice } from "@reduxjs/toolkit"
-import type { Message } from "../models/MessageModel"
+import type { MessageModel } from "../models/MessageModel"
 import type { Slice } from "../models/Slice"
 import type { UserModel } from "../models/UserModel"
 import axios from "axios"
@@ -9,7 +9,7 @@ import {  decreaseCounter, increaseCounter } from "./chatSlice"
 
 
 
-interface MessageSliceModel extends Slice<Message> {
+interface MessageSliceModel extends Slice<MessageModel> {
   isSending: boolean
 }
 
@@ -22,7 +22,7 @@ const initialState: MessageSliceModel = {
 
 export const getMessages = createAsyncThunk(
   "messages/getMessages",
-  async ({chat}: { chat: string }, { dispatch }) => {
+  async ({chat}: { chat: string }) => {
     const {data} =await axios.get(`${MESSAGEROUTE}/chat/${chat}`)
     return data.messages
   },
@@ -30,7 +30,7 @@ export const getMessages = createAsyncThunk(
 
 export const createMessage = createAsyncThunk(
   'messages/createMessage',
-  (message: Message, {getState, dispatch}) => {
+  (message: MessageModel, {getState, dispatch}) => {
     const state: any = getState()
     const chats: ChatModel[] = state.chats.container 
     const currentUser: UserModel = state.currentUser.user
@@ -45,7 +45,7 @@ export const createMessage = createAsyncThunk(
 
 export const deleteMessage = createAsyncThunk(
   "messages/deleteMessage",
-  async ({message, currentUserId}: {message: Message, currentUserId: string}, { dispatch, getState }) => {
+  async ({message, currentUserId}: {message: MessageModel, currentUserId: string}, { dispatch, getState }) => {
     if(typeof message.user === 'string' )
     message.user !== currentUserId && !message.isRead && dispatch(decreaseCounter({chatId: message.chat}))
     return {messageId: message._id}
@@ -56,7 +56,7 @@ export const messagesSlice = createSlice({
   name: "messages",
   initialState,
   reducers: {
-    createTempMessage: (state, action: PayloadAction<Message>) => {
+    createTempMessage: (state, action: PayloadAction<MessageModel>) => {
       state.container.push(action.payload)
     },
 

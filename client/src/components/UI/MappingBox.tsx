@@ -2,9 +2,9 @@ import React, {ReactNode} from 'react'
 
 interface MappingBoxProps {
     className?: string
-    isLoading: boolean
+    isLoading?: boolean
     isAlternate: boolean
-    loadingComponent: ReactNode | string
+    loadingComponent?: ReactNode | string
     alternateComponent: ReactNode | string
     children: ReactNode
 

@@ -13,7 +13,6 @@ export const useOnScreen: useOnScreenParams = (elem, rootElem, threshold = 0) =>
 
     useEffect(()=> {
         const elemObserver = new IntersectionObserver(([entry], observer) => {
-            console.log(entry);
             if(entry.isIntersecting){
                 setIsVisible(true)
                 observer.unobserve(entry.target)
@@ -22,7 +21,6 @@ export const useOnScreen: useOnScreenParams = (elem, rootElem, threshold = 0) =>
         {
             root: rootElem,
             threshold
-            
         }
         )
 
