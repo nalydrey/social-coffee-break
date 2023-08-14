@@ -50,7 +50,6 @@ export const useForm: UseForm = (formFields) => {
       }
     })
     setValid(changedFields.every((field) => !field.isError))
-
     setFields(changedFields)
   }
 
@@ -73,4 +72,5 @@ export const useForm: UseForm = (formFields) => {
     onSubmit,
     clearForm,
   }
+  
 }
